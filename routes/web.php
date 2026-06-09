@@ -14,6 +14,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\CustomPackageController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\BlogController;
 
 // Service Desk Public Route
 Route::post('/service-desk/request', [ServiceDeskController::class, 'store'])
@@ -69,6 +70,10 @@ Route::get('/vendor-onboarding', [PageController::class, 'vendorOnboarding'])->n
 Route::get('/insights', [PageController::class, 'insights'])->name('insights');
 Route::get('/individual', [PageController::class, 'individual'])->name('individual');
 Route::get('/corporate', [PageController::class, 'corporate'])->name('corporate');
+
+// Blog
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 
 
@@ -177,6 +182,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('cities', \App\Http\Controllers\Admin\CityController::class);
     Route::get('/settings', [\App\Http\Controllers\Admin\SiteSettingController::class, 'index'])->name('settings.index');
     Route::put('/settings', [\App\Http\Controllers\Admin\SiteSettingController::class, 'update'])->name('settings.update');
+
+    // Blog Management
+    Route::resource('blog', \App\Http\Controllers\Admin\BlogController::class);
+    Route::patch('/blog/{blog}/toggle-publish', [\App\Http\Controllers\Admin\BlogController::class, 'togglePublish'])->name('blog.toggle-publish');
 });
 
 Route::middleware('auth')->group(function () {

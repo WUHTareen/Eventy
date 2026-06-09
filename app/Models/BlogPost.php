@@ -15,10 +15,28 @@ class BlogPost extends Model
         'category',
         'is_published',
         'published_at',
+        'author_id',
+        'views',
     ];
 
     protected $casts = [
         'published_at' => 'datetime',
         'is_published' => 'boolean',
     ];
+
+    public function author()
+    {
+        return $this->belongsTo(User::class, 'author_id');
+    }
+
+    public function scopePublished($query)
+    {
+        return $query->where('is_published', true);
+    }
+
+    public function getReadTimeAttribute()
+    {
+        $words = str_word_count(strip_tags($this->content));
+        return max(1, ceil($words / 200));
+    }
 }
