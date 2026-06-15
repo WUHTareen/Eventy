@@ -186,6 +186,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Blog Management
     Route::resource('blog', \App\Http\Controllers\Admin\BlogController::class);
     Route::patch('/blog/{blog}/toggle-publish', [\App\Http\Controllers\Admin\BlogController::class, 'togglePublish'])->name('blog.toggle-publish');
+    Route::post('/blog-upload-image', [\App\Http\Controllers\Admin\BlogController::class, 'uploadImage'])->name('blog.upload-image');
 });
 
 Route::middleware('auth')->group(function () {
@@ -265,19 +266,4 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin/hotels')->name('admin.h
     Route::put('/bookings/{booking}/status', [HotelController::class, 'adminUpdateBooking'])->name('bookings.update');
 });
 
-// Storage file server (symlink workaround)
-Route::get('/storage/{path}', function($path) {
-    $fullPath = storage_path('app/public/' . $path);
-    if (!file_exists($fullPath)) abort(404);
-    return response()->file($fullPath);
-})->where('path', '.*');
 
-// Storage file passthrough for LiteSpeed servers that don't follow symlinks
-Route::get('/storage/{path}', function ($path) {
-    $fullPath = storage_path('app/public/' . $path);
-    if (!file_exists($fullPath)) {
-        abort(404);
-    }
-    $mimeType = mime_content_type($fullPath);
-    return response()->file($fullPath, ['Content-Type' => $mimeType]);
-})->where('path', '.*');

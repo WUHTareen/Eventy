@@ -113,4 +113,17 @@ class BlogController extends Controller
         $status = $blog->is_published ? 'published' : 'unpublished';
         return back()->with('success', "Blog post {$status} successfully!");
     }
+
+    public function uploadImage(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|image|max:5120',
+        ]);
+
+        $path = $request->file('file')->store('blog/content', 'public');
+
+        return response()->json([
+            'location' => asset('storage/' . $path),
+        ]);
+    }
 }

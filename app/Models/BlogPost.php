@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class BlogPost extends Model
 {
@@ -38,5 +39,16 @@ class BlogPost extends Model
     {
         $words = str_word_count(strip_tags($this->content));
         return max(1, ceil($words / 200));
+    }
+
+    public function getFeaturedImageUrlAttribute()
+    {
+        if (empty($this->featured_image)) {
+            return null;
+        }
+        if (Str::startsWith($this->featured_image, ['http://', 'https://'])) {
+            return $this->featured_image;
+        }
+        return asset('storage/' . ltrim($this->featured_image, '/'));
     }
 }

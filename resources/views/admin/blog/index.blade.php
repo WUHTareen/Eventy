@@ -88,7 +88,7 @@
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
                                     @if($post->featured_image)
-                                        <img src="{{ asset('storage/' . $post->featured_image) }}" class="w-12 h-12 rounded-xl object-cover" alt="">
+                                        <img src="{{ $post->featured_image_url }}" class="w-12 h-12 rounded-xl object-cover" alt="">
                                     @else
                                         <div class="w-12 h-12 rounded-xl bg-[#0A3A7A]/10 flex items-center justify-center">
                                             <i class="fa-solid fa-image text-[#0A3A7A]"></i>

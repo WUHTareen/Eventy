@@ -36,7 +36,7 @@
             @foreach($posts as $post)
             <a href="{{ route('blog.show', $post->slug) }}" class="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
                 @if($post->featured_image)
-                    <img src="{{ asset('storage/' . $post->featured_image) }}" alt="{{ $post->title }}" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                    <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
                 @else
                     <div class="w-full h-48 bg-gradient-to-br from-[#0A3A7A]/10 to-[#0A3A7A]/5 flex items-center justify-center">
                         <i class="fa-solid fa-newspaper text-[#0A3A7A]/30 text-4xl"></i>

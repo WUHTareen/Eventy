@@ -5,6 +5,11 @@
 
     RewriteEngine On
 
+    # Serve uploaded files directly from storage/app/public/
+    RewriteCond %{REQUEST_URI} ^/storage/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^storage/(.*)$ storage/app/public/$1 [L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

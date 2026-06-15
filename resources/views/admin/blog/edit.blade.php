@@ -50,7 +50,7 @@
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Featured Image</label>
                             @if($blog->featured_image)
-                                <img src="{{ asset('storage/' . $blog->featured_image) }}" class="h-16 w-auto rounded-lg mb-2 object-cover" alt="">
+                                <img src="{{ $blog->featured_image_url }}" class="h-16 w-auto rounded-lg mb-2 object-cover" alt="">
                             @endif
                             <input type="file" name="featured_image" accept="image/*"
                                 class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0A3A7A]/20 focus:border-[#0A3A7A] outline-none transition">
@@ -63,7 +63,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Content <span class="text-red-500">*</span></label>
-                        <textarea name="content" id="blog-content" rows="16" required
+                        <textarea name="content" id="blog-content" rows="16"
                             class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#0A3A7A]/20 focus:border-[#0A3A7A] outline-none transition font-mono">{{ old('content', $blog->content) }}</textarea>
                     </div>
                 </div>
@@ -87,7 +87,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js" referrerpolicy="origin"></script>
     <script>
         tinymce.init({
             selector: '#blog-content',
@@ -97,6 +97,28 @@
             menubar: true,
             branding: false,
             promotion: false,
+            license_key: 'gpl',
+            automatic_uploads: true,
+            images_upload_url: '{{ route('admin.blog.upload-image') }}',
+            images_upload_credentials: true,
+            file_picker_types: 'image',
+            images_upload_handler: function (blobInfo, progress) {
+                return new Promise(function (resolve, reject) {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', '{{ route('admin.blog.upload-image') }}');
+                    xhr.setRequestHeader('X-CSRF-TOKEN', '{{ csrf_token() }}');
+                    xhr.upload.onprogress = function (e) { progress(e.loaded / e.total * 100); };
+                    xhr.onload = function () {
+                        if (xhr.status !== 200) { reject('Upload failed: ' + xhr.status); return; }
+                        var json = JSON.parse(xhr.responseText);
+                        resolve(json.location);
+                    };
+                    xhr.onerror = function () { reject('Image upload failed'); };
+                    var formData = new FormData();
+                    formData.append('file', blobInfo.blob(), blobInfo.filename());
+                    xhr.send(formData);
+                });
+            },
         });
     </script>
 </x-app-layout>

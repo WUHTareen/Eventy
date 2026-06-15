@@ -14,7 +14,7 @@
         </div>
 
         @if($post->featured_image)
-            <img src="{{ asset('storage/' . $post->featured_image) }}" alt="{{ $post->title }}" class="w-full h-64 sm:h-80 object-cover rounded-2xl mb-8 shadow">
+            <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" class="w-full h-64 sm:h-80 object-cover rounded-2xl mb-8 shadow">
         @endif
 
         <div class="flex flex-wrap items-center gap-3 mb-4">
@@ -50,7 +50,7 @@
                 @foreach($related as $rel)
                 <a href="{{ route('blog.show', $rel->slug) }}" class="group bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition">
                     @if($rel->featured_image)
-                        <img src="{{ asset('storage/' . $rel->featured_image) }}" class="w-full h-32 object-cover" alt="">
+                        <img src="{{ $rel->featured_image_url }}" class="w-full h-32 object-cover" alt="">
                     @else
                         <div class="w-full h-32 bg-[#0A3A7A]/5 flex items-center justify-center">
                             <i class="fa-solid fa-newspaper text-[#0A3A7A]/30 text-2xl"></i>
