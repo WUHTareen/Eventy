@@ -1225,30 +1225,29 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
                 @php
-                    $featuredOffers = [
-                        ['id' => 33, 'title' => 'Marriott Executive Protocol', 'loc' => 'Islamabad Node', 'price' => '45,000', 'rating' => '4.9', 'img' => 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop', 'cat' => 'Hotel Asset'],
-                        ['id' => 29, 'title' => 'Monarch Wedding Heritage', 'loc' => 'Lahore Hub', 'price' => '850,000', 'rating' => '5.0', 'img' => 'https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=2070&auto=format&fit=crop', 'cat' => 'Event Asset'],
-                        ['id' => 30, 'title' => 'Dubai Skyline Summit', 'loc' => 'Global Node', 'price' => '120,000', 'rating' => '4.8', 'img' => 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2070&auto=format&fit=crop', 'cat' => 'Travel Asset'],
-                        ['id' => 31, 'title' => 'Technical Catering Unit', 'loc' => 'Karachi District', 'price' => '2,500', 'rating' => '4.7', 'img' => 'https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=2070&auto=format&fit=crop', 'cat' => 'Catering Asset'],
-                    ];
+                    $featuredOffers = $pakistanServices->merge($globalServices)->take(4);
                 @endphp
 
                 @foreach($featuredOffers as $offer)
-                <a href="{{ route('services.show', $offer['id']) }}" class="group relative bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-2xl shadow-gray-200/40 hover:shadow-[#ED1C24]/10 transition-all duration-700 hover:-translate-y-4 block">
+                @php
+                    $offerImg = $offer->getFeaturedImage();
+                    $offerImg = $offerImg ? (\Illuminate\Support\Str::startsWith($offerImg, ['http', 'https']) ? $offerImg : asset('storage/' . $offerImg)) : 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=800&q=80';
+                @endphp
+                <a href="{{ route('services.show', $offer) }}" class="group relative bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-2xl shadow-gray-200/40 hover:shadow-[#ED1C24]/10 transition-all duration-700 hover:-translate-y-4 block">
                     <!-- Image Architecture -->
                     <div class="relative h-72 overflow-hidden">
-                        <img src="{{ $offer['img'] }}" alt="{{ $offer['title'] }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                        <img src="{{ $offerImg }}" alt="{{ $offer->name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                         <div class="absolute inset-0 bg-gradient-to-t from-[#0A192F]/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                        
+
                         <!-- Premium Badge -->
                         <div class="absolute top-6 left-6 px-4 py-2 bg-[#0A192F]/80 backdrop-blur-xl border border-white/10 rounded-full">
-                            <span class="text-[9px] font-black text-white uppercase tracking-widest">{{ $offer['cat'] }}</span>
+                            <span class="text-[9px] font-black text-white uppercase tracking-widest">{{ $offer->category->name ?? 'Service' }}</span>
                         </div>
-                        
+
                         <!-- Rating Protocol -->
                         <div class="absolute top-6 right-6 px-4 py-2 bg-white/90 backdrop-blur-xl rounded-full flex items-center gap-2">
                              <i class="fa-solid fa-star text-[#ED1C24] text-[10px]"></i>
-                             <span class="text-[11px] font-black text-[#0A192F]">{{ $offer['rating'] }}</span>
+                             <span class="text-[11px] font-black text-[#0A192F]">{{ number_format($offer->cached_rating ?? 5, 1) }}</span>
                         </div>
                     </div>
 
@@ -1257,16 +1256,16 @@
                         <div class="space-y-2">
                             <div class="flex items-center gap-2 text-[10px] font-black text-[#ED1C24] uppercase tracking-widest opacity-60">
                                 <i class="fa-solid fa-location-crosshairs"></i>
-                                {{ $offer['loc'] }}
+                                {{ $offer->location }}
                             </div>
-                            <h3 class="text-xl font-black text-[#0A192F] uppercase tracking-tighter leading-tight group-hover:text-[#ED1C24] transition-colors">{{ $offer['title'] }}</h3>
+                            <h3 class="text-xl font-black text-[#0A192F] uppercase tracking-tighter leading-tight group-hover:text-[#ED1C24] transition-colors">{{ $offer->name }}</h3>
                         </div>
 
                         <div class="flex items-center justify-between pt-6 border-t border-gray-50">
                             <div>
                                 <span class="block text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Entry Value</span>
                                 <div class="text-2xl font-black text-[#0A192F]">
-                                    <span class="text-sm font-medium text-gray-400 mr-1">PKR</span>{{ $offer['price'] }}
+                                    <span class="text-sm font-medium text-gray-400 mr-1">PKR</span>{{ number_format($offer->price) }}
                                 </div>
                             </div>
                             <div class="w-12 h-12 rounded-2xl bg-[#F8FAFC] border border-gray-100 flex items-center justify-center text-[#0A192F] group-hover:bg-[#ED1C24] group-hover:text-white transition-all duration-500">
