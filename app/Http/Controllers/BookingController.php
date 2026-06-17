@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\BookingReceipt;
+use App\Mail\BookingNotification;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class BookingController extends Controller
@@ -265,22 +266,54 @@ class BookingController extends Controller
             'indigo'
         );
 
-        // Notify the user about their booking
-        Notification::createBookingNotification(
-            Auth::id(),
-            'Deployment Scheduled',
-            'Your booking for "' . $service->name . '" has been submitted for verification. Current Status: [Pending Node Approval].',
-            route('bookings.index'),
-            'fa-clock',
-            'orange'
-        );
+        // Notify the user about their booking (only for logged-in customers)
+        if (Auth::check()) {
+            Notification::createBookingNotification(
+                Auth::id(),
+                'Deployment Scheduled',
+                'Your booking for "' . $service->name . '" has been submitted for verification. Current Status: [Pending Node Approval].',
+                route('bookings.index'),
+                'fa-clock',
+                'orange'
+            );
+        }
 
-        // Send Email Receipt
+        // Send Email Receipt to the customer
         try {
             Mail::to($request->customer_email)->send(new BookingReceipt($booking));
         } catch (\Exception $e) {
             // Log mail error but don't stop flow
-            \Illuminate\Support\Facades\Log::error('Mail sending failed: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Customer receipt mail failed: ' . $e->getMessage());
+        }
+
+        // Notify the vendor by email about the new booking
+        try {
+            $vendorEmail = optional($service->user)->email;
+            if ($vendorEmail) {
+                Mail::to($vendorEmail)->send(new BookingNotification(
+                    $booking,
+                    'New Booking Received: ' . $service->name,
+                    'You have a new booking from ' . $request->customer_name
+                        . ' (' . $request->customer_phone . '). Please review and confirm it from your orders dashboard.'
+                ));
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Vendor notification mail failed: ' . $e->getMessage());
+        }
+
+        // Notify platform admins by email
+        try {
+            $adminEmails = \App\Models\User::where('role', 'admin')->pluck('email')->filter()->all();
+            if (!empty($adminEmails)) {
+                Mail::to($adminEmails)->send(new BookingNotification(
+                    $booking,
+                    'New Booking on Eventy: ' . $service->name,
+                    'A new booking (#' . $booking->id . ') was placed by ' . $request->customer_name
+                        . ' for "' . $service->name . '".'
+                ));
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Admin notification mail failed: ' . $e->getMessage());
         }
 
         return redirect()->route('home')->with('success', 'Thank you! Your booking protocol has been initiated safely.');
@@ -389,6 +422,19 @@ class BookingController extends Controller
             'fa-check-circle',
             'blue'
         );
+
+        // Email the customer about the status change
+        try {
+            if ($booking->customer_email) {
+                Mail::to($booking->customer_email)->send(new BookingNotification(
+                    $booking,
+                    'Booking ' . ucfirst($request->status) . ': ' . $booking->service->name,
+                    $statusMessages[$request->status] ?? ('Your booking status is now ' . $request->status . '.')
+                ));
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Status update mail failed: ' . $e->getMessage());
+        }
 
         return redirect()->back()->with('success', 'Order status updated.');
     }
