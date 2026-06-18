@@ -82,10 +82,12 @@ Route::get('/packages', [CustomPackageController::class, 'index'])->name('packag
 Route::get('/packages/{package}', [CustomPackageController::class, 'show'])->name('packages.show');
 
 
+// Booking form — open to guests (no login required)
+Route::get('/services/{service}/book', [BookingController::class, 'create'])->name('services.book');
+Route::post('/services/{service}/book', [BookingController::class, 'store'])->name('services.store_booking');
+
 // User Booking Routes
 Route::middleware(['auth'])->group(function () {
-    Route::get('/services/{service}/book', [BookingController::class, 'create'])->name('services.book');
-    Route::post('/services/{service}/book', [BookingController::class, 'store'])->name('services.store_booking');
     Route::get('/my-bookings', [BookingController::class, 'index'])->name('bookings.index');
     Route::get('/bookings/{booking}/invoice', [BookingController::class, 'downloadInvoice'])->name('bookings.invoice');
     
@@ -161,6 +163,10 @@ Route::middleware(['auth', 'role:affiliate'])->prefix('affiliate')->name('affili
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/services', [AdminController::class, 'services'])->name('services');
+Route::get('/services/{service}/edit', [VendorController::class, 'editService'])->name('services.edit');
+Route::put('/services/{service}', [VendorController::class, 'updateService'])->name('services.update');
+Route::put('/services/{service}/toggle', [AdminController::class, 'toggleFeature'])->name('services.toggle');
+Route::delete('/services/{service}', [AdminController::class, 'deleteService'])->name('services.delete');
     Route::get('/bookings', [AdminController::class, 'bookings'])->name('bookings');
     Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
     Route::put('/users/{user}/ban', [\App\Http\Controllers\Admin\UserController::class, 'toggleBan'])->name('users.ban');

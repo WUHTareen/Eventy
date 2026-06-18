@@ -144,7 +144,7 @@ class VendorController extends Controller
 
     public function editService(Service $service)
     {
-        if ($service->user_id !== Auth::id()) {
+        if ($service->user_id !== Auth::id() && !Auth::user()->hasRole('admin')) {
             abort(403);
         }
         $categories = \App\Models\ServiceCategory::all();
@@ -153,7 +153,7 @@ class VendorController extends Controller
 
     public function updateService(Request $request, Service $service)
     {
-        if ($service->user_id !== Auth::id()) {
+        if ($service->user_id !== Auth::id() && !Auth::user()->hasRole('admin')) {
             abort(403);
         }
 
@@ -222,7 +222,8 @@ class VendorController extends Controller
 
         $service->update($data);
 
-        return redirect()->route('vendor.dashboard')->with('success', 'Service updated successfully.');
+        $redirectRoute = Auth::user()->hasRole('admin') ? 'admin.services' : 'vendor.dashboard';
+        return redirect()->route($redirectRoute)->with('success', 'Service updated successfully.');
     }
 
     public function destroyService(Service $service)

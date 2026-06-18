@@ -162,6 +162,11 @@
                         <x-dropdown-link :href="route('notifications.index')">
                             <i class="fa-solid fa-bell mr-2 text-gray-400"></i> {{ __('Notifications') }}
                         </x-dropdown-link>
+                        @if(Auth::user()->hasRole('admin'))
+                        <x-dropdown-link :href="route('admin.bookings')">
+                            <i class="fa-solid fa-calendar-check mr-2 text-[#0A3A7A]"></i> {{ __('All Bookings') }}
+                        </x-dropdown-link>
+                        @endif
                         <x-dropdown-link :href="route('bookings.index')">
                             <i class="fa-solid fa-calendar-check mr-2 text-[#ED1C24]"></i> {{ __('My Bookings') }}
                         </x-dropdown-link>

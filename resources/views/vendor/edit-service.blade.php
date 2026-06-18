@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center gap-4">
-            <a href="{{ route('vendor.dashboard') }}" class="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center text-gray-600 transition-colors">
+            <a href="{{ Auth::user()->hasRole('admin') ? route('admin.services') : route('vendor.dashboard') }}" class="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center text-gray-600 transition-colors">
                 <i class="fa-solid fa-arrow-left"></i>
             </a>
             <div>
@@ -30,7 +30,7 @@
                 </div>
 
                 <!-- Form Body -->
-                <form action="{{ route('vendor.update-service', $service) }}" method="POST" enctype="multipart/form-data" class="p-8 space-y-8"
+                <form action="{{ Auth::user()->hasRole('admin') ? route('admin.services.update', $service) : route('vendor.update-service', $service) }}" method="POST" enctype="multipart/form-data" class="p-8 space-y-8"
                       x-data="serviceEditor({ 
                           existing: {{ json_encode($service->images ?? ($service->image ? [$service->image] : [])) }},
                           featured: {{ $service->featured_image_index ?? 0 }},
@@ -350,7 +350,7 @@
                         <h4 class="font-black text-red-900 uppercase tracking-widest text-sm mb-1">Permanent Removal</h4>
                         <p class="text-gray-500 text-xs">Careful: All bookings and gallery data for this service will be wiped.</p>
                     </div>
-                    <form action="{{ route('vendor.destroy-service', $service) }}" method="POST" onsubmit="return confirm('?? IRREVERSIBLE ACTION: Are you absolutely sure?')">
+                    <form action="{{ Auth::user()->hasRole('admin') ? route('admin.services.delete', $service) : route('vendor.destroy-service', $service) }}" method="POST" onsubmit="return confirm('?? IRREVERSIBLE ACTION: Are you absolutely sure?')">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="bg-red-50 text-red-600 hover:bg-red-600 hover:text-white font-black py-4 px-8 rounded-2xl transition-all flex items-center gap-2 text-xs uppercase tracking-widest shadow-sm">

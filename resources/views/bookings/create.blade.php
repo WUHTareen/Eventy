@@ -1,5 +1,8 @@
-<x-app-layout>
-    @push('styles')
+@extends('layouts.public')
+
+@section('title', 'Book ' . $service->name)
+
+@push('styles')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         .booking-bg {
@@ -98,6 +101,7 @@
     </style>
     @endpush
 
+    @section('content')
     <div class="min-h-screen booking-bg py-12 px-4 sm:px-6 lg:px-8 font-sans" x-data="bookingWizard()" x-cloak>
         
         <!-- Navbar Placeholder/Back Button -->
@@ -1124,5 +1128,5 @@
             }));
         });
     </script>
-</x-app-layout>
+    @endsection
 

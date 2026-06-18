@@ -82,12 +82,16 @@
                                         <div class="flex items-center justify-end gap-2">
                                             <form action="{{ route('admin.services.toggle', $service) }}" method="POST">
                                                 @csrf
+                                                @method('PUT')
                                                 <button type="submit" class="w-8 h-8 rounded-lg flex items-center justify-center transition-all {{ $service->is_featured ? 'bg-yellow-100 text-yellow-600 hover:bg-yellow-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200' }}" title="{{ $service->is_featured ? 'Unfeature' : 'Feature' }}">
                                                     <i class="fa-solid fa-star"></i>
                                                 </button>
                                             </form>
                                             <a href="{{ route('services.show', $service) }}" class="w-8 h-8 bg-blue-50 hover:bg-blue-100 text-primary-500 rounded-lg flex items-center justify-center transition-all" title="View">
                                                 <i class="fa-solid fa-eye"></i>
+                                            </a>
+                                            <a href="{{ route('admin.services.edit', $service) }}" class="w-8 h-8 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center transition-all" title="Edit">
+                                                <i class="fa-solid fa-pen"></i>
                                             </a>
                                             <form action="{{ route('admin.services.delete', $service) }}" method="POST" onsubmit="return confirm('Delete this service?')">
                                                 @csrf

@@ -223,16 +223,10 @@
 
                     <!-- Deployment Buttons -->
                     <div class="space-y-3">
-                        @auth
-                            <a href="{{ route('services.book', $service) }}" class="w-full py-5 bg-[#ED1C24] text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-red-500/20 flex items-center justify-center gap-3 transition-all hover:bg-[#0A192F] hover:scale-[1.03] active:scale-95">
-                                Initiate Deployment <i class="fa-solid fa-arrow-right-long text-[10px]"></i>
-                            </a>
-                        @else
-                            <a href="{{ route('login') }}" class="w-full py-5 bg-[#0A192F] text-white rounded-2xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-3 transition-all hover:bg-[#ED1C24]">
-                                Authentication Required <i class="fa-solid fa-lock text-[10px]"></i>
-                            </a>
-                        @endauth
-                        
+                        <a href="{{ route('services.book', $service) }}" class="w-full py-5 bg-[#ED1C24] text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-red-500/20 flex items-center justify-center gap-3 transition-all hover:bg-[#0A192F] hover:scale-[1.03] active:scale-95">
+                            Initiate Deployment <i class="fa-solid fa-arrow-right-long text-[10px]"></i>
+                        </a>
+
                         <a href="{{ route('contact') }}" class="w-full py-4 bg-white text-slate-900 border border-slate-200 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-slate-50 transition-all">
                             Request Briefing <i class="fa-solid fa-file-invoice-dollar"></i>
                         </a>

@@ -1,0 +1,147 @@
+diff --git a/app/Http/Controllers/BookingController.php b/app/Http/Controllers/BookingController.php
+index 004686e..47c4c26 100644
+--- a/app/Http/Controllers/BookingController.php
++++ b/app/Http/Controllers/BookingController.php
+@@ -265,15 +265,17 @@ public function store(Request $request, Service $service)
+             'indigo'
+         );
+ 
+-        // Notify the user about their booking
+-        Notification::createBookingNotification(
+-            Auth::id(),
+-            'Deployment Scheduled',
+-            'Your booking for "' . $service->name . '" has been submitted for verification. Current Status: [Pending Node Approval].',
+-            route('bookings.index'),
+-            'fa-clock',
+-            'orange'
+-        );
++        // Notify the user about their booking (only for logged-in customers)
++        if (Auth::check()) {
++            Notification::createBookingNotification(
++                Auth::id(),
++                'Deployment Scheduled',
++                'Your booking for "' . $service->name . '" has been submitted for verification. Current Status: [Pending Node Approval].',
++                route('bookings.index'),
++                'fa-clock',
++                'orange'
++            );
++        }
+ 
+         // Send Email Receipt
+         try {
+diff --git a/database/migrations/2026_06_15_000001_make_user_id_nullable_on_bookings.php b/database/migrations/2026_06_15_000001_make_user_id_nullable_on_bookings.php
+new file mode 100644
+index 0000000..d058dfa
+--- /dev/null
++++ b/database/migrations/2026_06_15_000001_make_user_id_nullable_on_bookings.php
+@@ -0,0 +1,36 @@
++<?php
++
++use Illuminate\Database\Migrations\Migration;
++use Illuminate\Database\Schema\Blueprint;
++use Illuminate\Support\Facades\Schema;
++use Illuminate\Support\Facades\DB;
++
++return new class extends Migration
++{
++    public function up(): void
++    {
++        // Allow guest bookings: user_id can be null
++        Schema::table('bookings', function (Blueprint $table) {
++            $table->dropForeign(['user_id']);
++        });
++
++        DB::statement('ALTER TABLE bookings MODIFY user_id BIGINT UNSIGNED NULL');
++
++        Schema::table('bookings', function (Blueprint $table) {
++            $table->foreign('user_id')->references('id')->on('users')->nullOnDelete();
++        });
++    }
++
++    public function down(): void
++    {
++        Schema::table('bookings', function (Blueprint $table) {
++            $table->dropForeign(['user_id']);
++        });
++
++        DB::statement('ALTER TABLE bookings MODIFY user_id BIGINT UNSIGNED NOT NULL');
++
++        Schema::table('bookings', function (Blueprint $table) {
++            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
++        });
++    }
++};
+diff --git a/resources/views/bookings/create.blade.php b/resources/views/bookings/create.blade.php
+index 8b3d7d3..df4ed76 100644
+--- a/resources/views/bookings/create.blade.php
++++ b/resources/views/bookings/create.blade.php
+@@ -1,5 +1,8 @@
+-<x-app-layout>
+-    @push('styles')
++@extends('layouts.public')
++
++@section('title', 'Book ' . $service->name)
++
++@push('styles')
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+     <style>
+         .booking-bg {
+@@ -98,6 +101,7 @@
+     </style>
+     @endpush
+ 
++    @section('content')
+     <div class="min-h-screen booking-bg py-12 px-4 sm:px-6 lg:px-8 font-sans" x-data="bookingWizard()" x-cloak>
+         
+         <!-- Navbar Placeholder/Back Button -->
+@@ -1124,5 +1128,5 @@ class="bg-slate-900/90 backdrop-blur text-white px-6 py-3 rounded-full shadow-2x
+             }));
+         });
+     </script>
+-</x-app-layout>
++    @endsection
+ 
+diff --git a/resources/views/pages/service-detail.blade.php b/resources/views/pages/service-detail.blade.php
+index d8b4f90..f575a29 100644
+--- a/resources/views/pages/service-detail.blade.php
++++ b/resources/views/pages/service-detail.blade.php
+@@ -223,16 +223,10 @@
+ 
+                     <!-- Deployment Buttons -->
+                     <div class="space-y-3">
+-                        @auth
+-                            <a href="{{ route('services.book', $service) }}" class="w-full py-5 bg-[#ED1C24] text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-red-500/20 flex items-center justify-center gap-3 transition-all hover:bg-[#0A192F] hover:scale-[1.03] active:scale-95">
+-                                Initiate Deployment <i class="fa-solid fa-arrow-right-long text-[10px]"></i>
+-                            </a>
+-                        @else
+-                            <a href="{{ route('login') }}" class="w-full py-5 bg-[#0A192F] text-white rounded-2xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-3 transition-all hover:bg-[#ED1C24]">
+-                                Authentication Required <i class="fa-solid fa-lock text-[10px]"></i>
+-                            </a>
+-                        @endauth
+-                        
++                        <a href="{{ route('services.book', $service) }}" class="w-full py-5 bg-[#ED1C24] text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-red-500/20 flex items-center justify-center gap-3 transition-all hover:bg-[#0A192F] hover:scale-[1.03] active:scale-95">
++                            Initiate Deployment <i class="fa-solid fa-arrow-right-long text-[10px]"></i>
++                        </a>
++
+                         <a href="{{ route('contact') }}" class="w-full py-4 bg-white text-slate-900 border border-slate-200 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-slate-50 transition-all">
+                             Request Briefing <i class="fa-solid fa-file-invoice-dollar"></i>
+                         </a>
+diff --git a/routes/web.php b/routes/web.php
+index c84f323..843e2b9 100644
+--- a/routes/web.php
++++ b/routes/web.php
+@@ -82,10 +82,12 @@
+ Route::get('/packages/{package}', [CustomPackageController::class, 'show'])->name('packages.show');
+ 
+ 
++// Booking form — open to guests (no login required)
++Route::get('/services/{service}/book', [BookingController::class, 'create'])->name('services.book');
++Route::post('/services/{service}/book', [BookingController::class, 'store'])->name('services.store_booking');
++
+ // User Booking Routes
+ Route::middleware(['auth'])->group(function () {
+-    Route::get('/services/{service}/book', [BookingController::class, 'create'])->name('services.book');
+-    Route::post('/services/{service}/book', [BookingController::class, 'store'])->name('services.store_booking');
+     Route::get('/my-bookings', [BookingController::class, 'index'])->name('bookings.index');
+     Route::get('/bookings/{booking}/invoice', [BookingController::class, 'downloadInvoice'])->name('bookings.invoice');
+     
