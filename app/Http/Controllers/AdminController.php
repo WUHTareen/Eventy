@@ -173,7 +173,27 @@ class AdminController extends Controller
     public function deleteService(Service $service)
     {
         $service->delete();
-        return redirect()->back()->with('success', 'Service deleted successfully.');
+        return redirect()->back()->with('success', 'Service moved to trash.');
+    }
+
+    public function trashedServices()
+    {
+        $services = Service::onlyTrashed()->with(['user', 'category'])->latest('deleted_at')->paginate(20);
+        return view('admin.services-trash', compact('services'));
+    }
+
+    public function restoreService($id)
+    {
+        $service = Service::onlyTrashed()->findOrFail($id);
+        $service->restore();
+        return redirect()->back()->with('success', 'Service restored successfully.');
+    }
+
+    public function forceDeleteService($id)
+    {
+        $service = Service::onlyTrashed()->findOrFail($id);
+        $service->forceDelete();
+        return redirect()->back()->with('success', 'Service permanently deleted.');
     }
 
     public function toggleFeature(Service $service)

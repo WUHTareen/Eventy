@@ -102,9 +102,11 @@
                             </x-dropdown>
                         </div>
                     @endif
+                    @unless(Auth::user()->hasRole('admin'))
                     <x-nav-link :href="route('home')" :active="request()->routeIs('home')">
                         <i class="fa-solid fa-compass mr-2 text-primary-500"></i> {{ __('Explore') }}
                     </x-nav-link>
+                    @endunless
                 </div>
             </div>
 
@@ -163,6 +165,9 @@
                             <i class="fa-solid fa-bell mr-2 text-gray-400"></i> {{ __('Notifications') }}
                         </x-dropdown-link>
                         @if(Auth::user()->hasRole('admin'))
+                        <x-dropdown-link :href="route('home')">
+                            <i class="fa-solid fa-compass mr-2 text-primary-500"></i> {{ __('Explore Site') }}
+                        </x-dropdown-link>
                         <x-dropdown-link :href="route('admin.bookings')">
                             <i class="fa-solid fa-calendar-check mr-2 text-[#0A3A7A]"></i> {{ __('All Bookings') }}
                         </x-dropdown-link>

@@ -4,12 +4,15 @@
             <a href="{{ Auth::user()->hasRole('admin') ? route('admin.services') : route('vendor.dashboard') }}" class="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center text-gray-600 transition-colors">
                 <i class="fa-solid fa-arrow-left"></i>
             </a>
-            <div>
+            <div class="flex-1">
                 <h2 class="font-bold text-2xl text-gray-800 leading-tight">
                     {{ __('Edit Service') }}
                 </h2>
                 <p class="text-gray-500 text-sm mt-1">Update your service details</p>
             </div>
+            <a href="{{ route('services.show', $service) }}" target="_blank" class="bg-primary-50 hover:bg-primary-100 text-primary-600 font-bold py-2.5 px-5 rounded-xl transition-all flex items-center gap-2">
+                <i class="fa-solid fa-eye"></i> Preview
+            </a>
         </div>
     </x-slot>
 
@@ -69,9 +72,6 @@
                             class="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:border-transparent transition-all placeholder-gray-400"
                             placeholder="Describe your service..." required>{{ old('description', $service->description) }}</textarea>
                         <x-input-error :messages="$errors->get('description')" class="mt-2" />
-                    </div>
-
-                        </div>
                     </div>
 
                     <!-- Pricing Section (Enhanced) -->
@@ -193,6 +193,7 @@
                                 </template>
                             </div>
                         </div>
+                    </div>
 
                     <!-- Event Suitability -->
                     <div>
@@ -211,6 +212,7 @@
                                 </label>
                             @endforeach
                         </div>
+                    </div>
 
                     <!-- Visual Assets Section -->
                     <div class="space-y-6">

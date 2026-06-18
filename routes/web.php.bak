@@ -167,9 +167,6 @@ Route::get('/services/{service}/edit', [VendorController::class, 'editService'])
 Route::put('/services/{service}', [VendorController::class, 'updateService'])->name('services.update');
 Route::put('/services/{service}/toggle', [AdminController::class, 'toggleFeature'])->name('services.toggle');
 Route::delete('/services/{service}', [AdminController::class, 'deleteService'])->name('services.delete');
-    Route::get('/services-trash', [AdminController::class, 'trashedServices'])->name('services.trash');
-    Route::put('/services/{id}/restore', [AdminController::class, 'restoreService'])->name('services.restore');
-    Route::delete('/services/{id}/force-delete', [AdminController::class, 'forceDeleteService'])->name('services.force-delete');
     Route::get('/bookings', [AdminController::class, 'bookings'])->name('bookings');
     Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
     Route::put('/users/{user}/ban', [\App\Http\Controllers\Admin\UserController::class, 'toggleBan'])->name('users.ban');

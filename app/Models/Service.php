@@ -5,9 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Service extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = ['category_id', 'user_id', 'name', 'description', 'price', 'price_type', 'location', 'extra_data', 'image', 'images', 'featured_image_index', 'status', 'is_featured', 'cached_rating', 'reviews_count', 'packages', 'add_ons'];
 
     protected $casts = [
