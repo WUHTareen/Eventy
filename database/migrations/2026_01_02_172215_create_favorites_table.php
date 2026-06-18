@@ -11,6 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Guard: 'favorites' table is already created by an earlier migration
+        // (2025_12_30_154529_create_favorites_table). This duplicate migration
+        // is kept only so its record stays in the migrations table; skip if exists.
+        if (Schema::hasTable('favorites')) {
+            return;
+        }
+
         Schema::create('favorites', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
