@@ -268,7 +268,7 @@
                                         removedIndices.includes(index) ? 'opacity-20 grayscale scale-90' : 'opacity-100'
                                      ]">
                                     
-                                    <img :src="storageUrl + '/' + img" class="w-full h-full object-cover">
+                                    <img :src="(img.startsWith('http://') || img.startsWith('https://')) ? img : storageUrl + '/' + img" class="w-full h-full object-cover">
                                     
                                     <!-- Management Overlay -->
                                     <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3" x-show="!removedIndices.includes(index)">
