@@ -166,6 +166,9 @@
                         <x-dropdown-link :href="route('admin.bookings')">
                             <i class="fa-solid fa-calendar-check mr-2 text-[#0A3A7A]"></i> {{ __('All Bookings') }}
                         </x-dropdown-link>
+                        <x-dropdown-link :href="route('admin.services')">
+                            <i class="fa-solid fa-boxes-stacked mr-2 text-[#0A3A7A]"></i> {{ __('All Services') }}
+                        </x-dropdown-link>
                         @endif
                         <x-dropdown-link :href="route('bookings.index')">
                             <i class="fa-solid fa-calendar-check mr-2 text-[#ED1C24]"></i> {{ __('My Bookings') }}
