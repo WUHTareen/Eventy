@@ -11,6 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Guard: 'reviews' table is already created by an earlier migration
+        // (2025_12_20_182311_create_reviews_table). This duplicate migration
+        // is kept only so its record stays in the migrations table; skip if exists.
+        if (Schema::hasTable('reviews')) {
+            return;
+        }
+
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
