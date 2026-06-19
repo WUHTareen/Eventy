@@ -10,8 +10,31 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#0A3A7A',
+                            50: '#f0f4f9', 100: '#e1e9f3', 200: '#c3d3e7', 300: '#a5bddb',
+                            400: '#6991c3', 500: '#0A3A7A', 600: '#09346e', 700: '#082b5c',
+                            800: '#062349', 900: '#051b3b', 950: '#030f21',
+                        },
+                        secondary: {
+                            DEFAULT: '#ED1C24',
+                            50: '#fef3f3', 100: '#fee7e7', 200: '#fcc3c5', 300: '#fa9fa3',
+                            400: '#f6575e', 500: '#ED1C24', 600: '#d51920', 700: '#b2151b',
+                            800: '#8e1115', 900: '#750e11', 950: '#4a090b',
+                        },
+                    },
+                },
+            },
+        };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <style>
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
