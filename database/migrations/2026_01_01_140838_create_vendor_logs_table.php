@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Guard: skip if 'vendor_logs' already exists (server may have it without a migration record).
+        if (Schema::hasTable('vendor_logs')) {
+            return;
+        }
+
         Schema::create('vendor_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('vendor_id')->constrained('users')->onDelete('cascade');

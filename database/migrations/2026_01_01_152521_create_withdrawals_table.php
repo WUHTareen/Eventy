@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Guard: skip if 'withdrawals' already exists (server may have it without a migration record).
+        if (Schema::hasTable('withdrawals')) {
+            return;
+        }
+
         Schema::create('withdrawals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');

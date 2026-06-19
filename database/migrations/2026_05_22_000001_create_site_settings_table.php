@@ -9,6 +9,13 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Guard: 'site_settings' may already exist on servers where it was
+        // created before this migration was recorded. Skip if it exists so
+        // the migration can be marked as run without erroring.
+        if (Schema::hasTable('site_settings')) {
+            return;
+        }
+
         Schema::create('site_settings', function (Blueprint $table) {
             $table->id();
             $table->string('key')->unique();

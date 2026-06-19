@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Guard: skip if 'coupons' already exists (server may have it without a migration record).
+        if (Schema::hasTable('coupons')) {
+            return;
+        }
+
         Schema::create('coupons', function (Blueprint $table) {
             $table->id();
             $table->string('code')->unique();

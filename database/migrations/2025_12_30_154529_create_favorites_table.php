@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Guard: skip if 'favorites' already exists (server may have it without a migration record).
+        if (Schema::hasTable('favorites')) {
+            return;
+        }
+
         Schema::create('favorites', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');

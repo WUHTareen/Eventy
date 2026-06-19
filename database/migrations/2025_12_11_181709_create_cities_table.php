@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Guard: skip if 'cities' already exists (server may have it without a migration record).
+        if (Schema::hasTable('cities')) {
+            return;
+        }
+
         Schema::create('cities', function (Blueprint $table) {
             $table->id();
             $table->string('name');

@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Guard: skip if 'service_desk_requests' already exists (server may have it without a migration record).
+        if (Schema::hasTable('service_desk_requests')) {
+            return;
+        }
+
         Schema::create('service_desk_requests', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');

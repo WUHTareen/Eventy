@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Guard: skip if 'review_likes' already exists (server may have it without a migration record).
+        if (Schema::hasTable('review_likes')) {
+            return;
+        }
+
         Schema::create('review_likes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');

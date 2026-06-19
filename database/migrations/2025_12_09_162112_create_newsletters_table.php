@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Guard: skip if 'newsletters' already exists (server may have it without a migration record).
+        if (Schema::hasTable('newsletters')) {
+            return;
+        }
+
         Schema::create('newsletters', function (Blueprint $table) {
             $table->id();
             $table->string('email')->unique();

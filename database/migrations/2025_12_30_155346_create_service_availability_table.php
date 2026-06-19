@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Guard: skip if 'service_availability' already exists (server may have it without a migration record).
+        if (Schema::hasTable('service_availability')) {
+            return;
+        }
+
         Schema::create('service_availability', function (Blueprint $table) {
             $table->id();
             $table->foreignId('service_id')->constrained()->onDelete('cascade');

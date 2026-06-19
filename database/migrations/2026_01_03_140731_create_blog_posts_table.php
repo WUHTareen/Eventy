@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Guard: skip if 'blog_posts' already exists (server may have it without a migration record).
+        if (Schema::hasTable('blog_posts')) {
+            return;
+        }
+
         Schema::create('blog_posts', function (\Illuminate\Database\Schema\Blueprint $table) {
             $table->id();
             $table->string('title');

@@ -8,6 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Guard: skip if 'hotels' already exists (server may have it without a migration record).
+        if (Schema::hasTable('hotels')) {
+            return;
+        }
+
         Schema::create('hotels', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade'); // vendor user

@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Guard: skip if 'custom_package_services' already exists (server may have it without a migration record).
+        if (Schema::hasTable('custom_package_services')) {
+            return;
+        }
+
         Schema::create('custom_package_services', function (Blueprint $table) {
             $table->id();
             $table->foreignId('custom_package_id')->constrained()->onDelete('cascade');
