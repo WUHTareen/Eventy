@@ -197,6 +197,32 @@ class AdminController extends Controller
         return redirect()->back()->with('success', 'Service permanently deleted.');
     }
 
+    public function deleteBooking(Booking $booking)
+    {
+        $booking->delete();
+        return redirect()->back()->with('success', 'Booking moved to trash.');
+    }
+
+    public function trashedBookings()
+    {
+        $bookings = Booking::onlyTrashed()->with(['user', 'service', 'vendor'])->latest('deleted_at')->paginate(20);
+        return view('admin.bookings-trash', compact('bookings'));
+    }
+
+    public function restoreBooking($id)
+    {
+        $booking = Booking::onlyTrashed()->findOrFail($id);
+        $booking->restore();
+        return redirect()->back()->with('success', 'Booking restored successfully.');
+    }
+
+    public function forceDeleteBooking($id)
+    {
+        $booking = Booking::onlyTrashed()->findOrFail($id);
+        $booking->forceDelete();
+        return redirect()->back()->with('success', 'Booking permanently deleted.');
+    }
+
     public function toggleFeature(Service $service)
     {
         $service->is_featured = !$service->is_featured;

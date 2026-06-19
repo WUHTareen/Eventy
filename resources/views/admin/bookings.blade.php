@@ -7,9 +7,14 @@
                 </h2>
                 <p class="text-gray-500 text-sm mt-1">Monitor all platform bookings</p>
             </div>
-            <a href="{{ route('admin.dashboard') }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-5 rounded-xl transition-all flex items-center gap-2">
-                <i class="fa-solid fa-arrow-left"></i> Back
-            </a>
+            <div class="flex gap-3">
+                <a href="{{ route('admin.bookings.trash') }}" class="bg-amber-50 hover:bg-amber-100 text-amber-600 font-bold py-2.5 px-5 rounded-xl transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-trash-can"></i> Trash
+                </a>
+                <a href="{{ route('admin.dashboard') }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-5 rounded-xl transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> Back
+                </a>
+            </div>
         </div>
     </x-slot>
 
@@ -92,9 +97,17 @@
                                         {{ $booking->created_at->diffForHumans() }}
                                     </td>
                                     <td class="px-6 py-4 text-right">
-                                        <a href="{{ route('bookings.invoice', $booking) }}" class="text-indigo-600 hover:text-indigo-900 font-bold flex items-center justify-end gap-1">
-                                            <i class="fa-solid fa-download"></i> Invoice
-                                        </a>
+                                        <div class="flex items-center justify-end gap-3">
+                                            <a href="{{ route('bookings.invoice', $booking) }}" class="text-indigo-600 hover:text-indigo-900 font-bold flex items-center gap-1">
+                                                <i class="fa-solid fa-download"></i> Invoice
+                                            </a>
+                                            <form action="{{ route('admin.bookings.delete', $booking) }}" method="POST" onsubmit="return confirm('Move this booking to trash?')">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="text-gray-400 hover:text-red-600 transition" title="Move to trash">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty

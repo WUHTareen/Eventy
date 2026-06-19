@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Service;
+use App\Models\Booking;
 use App\Models\City;
 use App\Models\ServiceCategory;
 use App\Models\Notification;
@@ -45,7 +47,8 @@ class UserController extends Controller
         $user->load(['city', 'bookings', 'reviews']);
         $cities = City::all();
         $categories = ServiceCategory::whereNull('parent_id')->get();
-        return view('admin.users.show', compact('user', 'cities', 'categories'));
+        $transferTargets = User::whereIn('role', ['vendor', 'admin'])->where('id', '!=', $user->id)->orderBy('name')->get();
+        return view('admin.users.show', compact('user', 'cities', 'categories', 'transferTargets'));
     }
 
     // Create user form
@@ -140,10 +143,41 @@ class UserController extends Controller
         return redirect()->back()->with('success', 'Vendor rejected.');
     }
 
-    // Delete user
-    public function destroy(User $user)
+    // Delete user (move to trash), optionally transferring their services/bookings to another user
+    public function destroy(Request $request, User $user)
     {
+        if ($request->filled('transfer_to')) {
+            $newOwner = User::findOrFail($request->transfer_to);
+
+            Service::where('user_id', $user->id)->update(['user_id' => $newOwner->id]);
+            Booking::where('vendor_id', $user->id)->update(['vendor_id' => $newOwner->id]);
+            Booking::where('user_id', $user->id)->update(['user_id' => $newOwner->id]);
+        }
+
         $user->delete();
-        return redirect()->route('admin.users.index')->with('success', 'User deleted successfully!');
+        return redirect()->route('admin.users.index')->with('success', 'User moved to trash successfully!');
+    }
+
+    // List trashed users
+    public function trashedUsers()
+    {
+        $users = User::onlyTrashed()->with(['city'])->latest('deleted_at')->paginate(15);
+        return view('admin.users.trash', compact('users'));
+    }
+
+    // Restore a trashed user
+    public function restoreUser($id)
+    {
+        $user = User::onlyTrashed()->findOrFail($id);
+        $user->restore();
+        return redirect()->back()->with('success', 'User restored successfully!');
+    }
+
+    // Permanently delete a trashed user
+    public function forceDeleteUser($id)
+    {
+        $user = User::onlyTrashed()->findOrFail($id);
+        $user->forceDelete();
+        return redirect()->back()->with('success', 'User permanently deleted.');
     }
 }
