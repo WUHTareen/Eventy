@@ -36,14 +36,14 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: #020617;
-            background-image: 
-                radial-gradient(at 0% 0%, hsla(222,47%,11%,1) 0, transparent 50%), 
-                radial-gradient(at 50% 0%, hsla(223,47%,7%,1) 0, transparent 50%), 
-                radial-gradient(at 100% 0%, hsla(223,47%,11%,1) 0, transparent 50%);
-            margin: 0; 
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0f172a;
+            background-image:
+                radial-gradient(at 0% 0%, hsla(222,47%,20%,1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(223,47%,16%,1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(222,47%,20%,1) 0, transparent 50%);
+            margin: 0;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -113,7 +113,8 @@
         }
 
         .input-dark::placeholder {
-            color: #475569;
+            color: #94A3B8;
+            opacity: 1;
         }
 
         .input-icon {
