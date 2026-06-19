@@ -4,8 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\Payment;
+use App\Models\SiteSetting;
+use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
 
@@ -37,7 +41,7 @@ class PaymentController extends Controller
                         'name' => $booking->service->name,
                         'description' => 'Booking #' . $booking->id,
                     ],
-                    'unit_amount' => $booking->service->price * 100, // Stripe uses cents
+                    'unit_amount' => (int) round(($booking->total_price ?: $booking->service->price) * 100), // Stripe uses cents
                 ],
                 'quantity' => 1,
             ]],
@@ -56,7 +60,7 @@ class PaymentController extends Controller
             [
                 'user_id' => Auth::id(),
                 'stripe_session_id' => $session->id,
-                'amount' => $booking->service->price,
+                'amount' => $booking->total_price ?: $booking->service->price,
                 'currency' => 'PKR',
                 'status' => 'pending',
                 'payment_method' => 'stripe'
@@ -64,6 +68,91 @@ class PaymentController extends Controller
         );
 
         return redirect()->away($session->url);
+    }
+
+    /**
+     * Show the manual / bank transfer payment page where the customer can
+     * see the platform's account details and upload proof of payment.
+     */
+    public function showManual(Booking $booking)
+    {
+        if (Auth::id() !== $booking->user_id) {
+            abort(403);
+        }
+
+        if ($booking->payment && $booking->payment->status === 'completed') {
+            return redirect()->route('bookings.index')->with('error', 'This booking is already paid.');
+        }
+
+        $accounts = [
+            'bank_name'        => SiteSetting::get('bank_name'),
+            'bank_title'       => SiteSetting::get('bank_account_title'),
+            'bank_account'     => SiteSetting::get('bank_account_number'),
+            'bank_iban'        => SiteSetting::get('bank_iban'),
+            'jazzcash_number'  => SiteSetting::get('jazzcash_number'),
+            'easypaisa_number' => SiteSetting::get('easypaisa_number'),
+            'instructions'     => SiteSetting::get('payment_instructions'),
+        ];
+
+        $amount = $booking->total_price ?: optional($booking->service)->price;
+
+        return view('bookings.pay-manual', compact('booking', 'accounts', 'amount'));
+    }
+
+    /**
+     * Store the customer's manual payment submission (proof + reference) and
+     * mark it as awaiting admin verification.
+     */
+    public function submitManual(Request $request, Booking $booking)
+    {
+        if (Auth::id() !== $booking->user_id) {
+            abort(403);
+        }
+
+        if ($booking->payment && $booking->payment->status === 'completed') {
+            return redirect()->route('bookings.index')->with('error', 'This booking is already paid.');
+        }
+
+        $validated = $request->validate([
+            'payment_method'        => 'required|in:bank,jazzcash,easypaisa',
+            'sender_name'           => 'required|string|max:120',
+            'transaction_reference' => 'nullable|string|max:120',
+            'payment_proof'         => 'required|image|mimes:png,jpg,jpeg|max:4096',
+        ]);
+
+        $proofPath = $request->file('payment_proof')->store('payment-proofs', 'public');
+
+        $amount = $booking->total_price ?: optional($booking->service)->price;
+
+        Payment::updateOrCreate(
+            ['booking_id' => $booking->id],
+            [
+                'user_id'               => Auth::id(),
+                'amount'                => $amount,
+                'currency'              => 'PKR',
+                'status'                => 'awaiting_verification',
+                'payment_method'        => $validated['payment_method'],
+                'payment_proof'         => $proofPath,
+                'transaction_reference' => $validated['transaction_reference'] ?? null,
+                'sender_name'           => $validated['sender_name'],
+                'admin_notes'           => null,
+                'verified_at'           => null,
+                'verified_by'           => null,
+            ]
+        );
+
+        // Notify all admins that a payment needs verification
+        foreach (User::where('role', 'admin')->pluck('id') as $adminId) {
+            Notification::createSystemNotification(
+                $adminId,
+                'Payment Verification Needed',
+                "Payment proof submitted for Booking #{$booking->id} (PKR " . number_format($amount) . ").",
+                route('admin.payments.index')
+            );
+        }
+
+        return redirect()->route('bookings.index')
+            ->with('success', 'Payment proof submitted! Our team will verify it shortly.');
     }
 
     public function success(Request $request, Booking $booking)

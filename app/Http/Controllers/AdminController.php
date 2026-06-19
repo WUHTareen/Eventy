@@ -11,6 +11,7 @@ use App\Models\ServiceCategory;
 use App\Models\BudgetRequest;
 use App\Models\ServiceDeskRequest;
 use App\Models\Withdrawal;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
@@ -249,6 +250,75 @@ class AdminController extends Controller
         );
 
         return back()->with('success', 'Withdrawal status updated successfully.');
+    }
+
+    /**
+     * List manual payments, prioritising those awaiting verification.
+     */
+    public function payments(Request $request)
+    {
+        $filter = $request->get('status', 'awaiting_verification');
+
+        $query = Payment::with(['booking.service', 'user'])
+            ->whereIn('payment_method', ['bank', 'jazzcash', 'easypaisa']);
+
+        if (in_array($filter, ['awaiting_verification', 'completed', 'failed'])) {
+            $query->where('status', $filter);
+        }
+
+        $payments = $query->latest()->paginate(20)->withQueryString();
+
+        $pendingCount = Payment::whereIn('payment_method', ['bank', 'jazzcash', 'easypaisa'])
+            ->where('status', 'awaiting_verification')->count();
+
+        return view('admin.payments.index', compact('payments', 'filter', 'pendingCount'));
+    }
+
+    /**
+     * Approve a manual payment after verifying the uploaded proof.
+     */
+    public function verifyPayment(Payment $payment)
+    {
+        $payment->update([
+            'status'      => 'completed',
+            'verified_at' => now(),
+            'verified_by' => auth()->id(),
+        ]);
+
+        Notification::createSystemNotification(
+            $payment->user_id,
+            'Payment Confirmed',
+            "Your payment for Booking #{$payment->booking_id} has been verified. Thank you!",
+            route('bookings.index')
+        );
+
+        return back()->with('success', 'Payment verified and marked as paid.');
+    }
+
+    /**
+     * Reject a manual payment (e.g. invalid/insufficient proof).
+     */
+    public function rejectPayment(Request $request, Payment $payment)
+    {
+        $request->validate([
+            'admin_notes' => 'nullable|string|max:500',
+        ]);
+
+        $payment->update([
+            'status'      => 'failed',
+            'admin_notes' => $request->admin_notes,
+            'verified_at' => now(),
+            'verified_by' => auth()->id(),
+        ]);
+
+        Notification::createSystemNotification(
+            $payment->user_id,
+            'Payment Rejected',
+            "Your payment proof for Booking #{$payment->booking_id} could not be verified. " . ($request->admin_notes ? "Reason: {$request->admin_notes}" : 'Please re-submit.'),
+            route('bookings.index')
+        );
+
+        return back()->with('success', 'Payment rejected. Customer has been notified.');
     }
 }
 

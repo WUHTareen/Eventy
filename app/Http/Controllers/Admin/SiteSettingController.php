@@ -31,6 +31,14 @@ class SiteSettingController extends Controller
             'stripe_secret'    => 'nullable|string|max:255',
             'commission_rate'  => 'nullable|numeric|min:0|max:100',
             'meta_description' => 'nullable|string|max:255',
+            // Manual / bank transfer payment details
+            'bank_name'           => 'nullable|string|max:120',
+            'bank_account_title'  => 'nullable|string|max:120',
+            'bank_account_number' => 'nullable|string|max:60',
+            'bank_iban'           => 'nullable|string|max:60',
+            'jazzcash_number'     => 'nullable|string|max:20',
+            'easypaisa_number'    => 'nullable|string|max:20',
+            'payment_instructions'=> 'nullable|string|max:1000',
             'logo'             => 'nullable|image|mimes:png,jpg,jpeg,svg|max:2048',
             'favicon'          => 'nullable|image|mimes:png,ico|max:512',
         ]);
@@ -40,6 +48,9 @@ class SiteSettingController extends Controller
             'footer_text', 'facebook_url', 'instagram_url', 'twitter_url',
             'whatsapp_number', 'stripe_key', 'stripe_secret',
             'commission_rate', 'meta_description',
+            'bank_name', 'bank_account_title', 'bank_account_number',
+            'bank_iban', 'jazzcash_number', 'easypaisa_number',
+            'payment_instructions',
         ];
 
         foreach ($fields as $field) {

@@ -96,6 +96,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/payment/success/{booking}', [\App\Http\Controllers\PaymentController::class, 'success'])->name('payment.success');
     Route::get('/payment/cancel/{booking}', [\App\Http\Controllers\PaymentController::class, 'cancel'])->name('payment.cancel');
 
+    // Manual / Bank Transfer payments
+    Route::get('/bookings/{booking}/pay/manual', [\App\Http\Controllers\PaymentController::class, 'showManual'])->name('payment.manual');
+    Route::post('/bookings/{booking}/pay/manual', [\App\Http\Controllers\PaymentController::class, 'submitManual'])->name('payment.manual.submit');
+
     Route::post('/bookings/{booking}/reviews', [\App\Http\Controllers\ReviewController::class, 'store'])->name('bookings.reviews.store');
     Route::post('/reviews/{review}/reply', [\App\Http\Controllers\ReviewController::class, 'reply'])->name('reviews.reply');
     Route::post('/reviews/{review}/like', [\App\Http\Controllers\ReviewController::class, 'toggleLike'])->name('reviews.like');
@@ -182,6 +186,11 @@ Route::delete('/services/{service}', [AdminController::class, 'deleteService'])-
     Route::get('/budget-requests', [AdminController::class, 'budgetRequests'])->name('budget-requests');
     Route::get('/withdrawals', [AdminController::class, 'withdrawals'])->name('withdrawals');
     Route::patch('/withdrawals/{withdrawal}', [AdminController::class, 'updateWithdrawalStatus'])->name('withdrawals.update');
+
+    // Manual payment verification
+    Route::get('/payments', [AdminController::class, 'payments'])->name('payments.index');
+    Route::put('/payments/{payment}/verify', [AdminController::class, 'verifyPayment'])->name('payments.verify');
+    Route::put('/payments/{payment}/reject', [AdminController::class, 'rejectPayment'])->name('payments.reject');
 
     // Setup & Configuration
     Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);

@@ -14,7 +14,17 @@ class Payment extends Model
         'amount',
         'currency',
         'status',
-        'payment_method'
+        'payment_method',
+        'payment_proof',
+        'transaction_reference',
+        'sender_name',
+        'admin_notes',
+        'verified_at',
+        'verified_by',
+    ];
+
+    protected $casts = [
+        'verified_at' => 'datetime',
     ];
 
     public function booking(): BelongsTo
@@ -25,5 +35,20 @@ class Payment extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function verifier(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'verified_by');
+    }
+
+    public function isCompleted(): bool
+    {
+        return $this->status === 'completed';
+    }
+
+    public function isAwaitingVerification(): bool
+    {
+        return $this->status === 'awaiting_verification';
     }
 }

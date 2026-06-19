@@ -35,6 +35,9 @@
                         <a href="{{ route('admin.budget-requests') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-slate-50 transition-colors">
                             <i class="fa-solid fa-calculator text-primary-500 w-4"></i> Budget Requests
                         </a>
+                        <a href="{{ route('admin.payments.index') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-slate-50 transition-colors">
+                            <i class="fa-solid fa-receipt text-emerald-500 w-4"></i> Payment Verification
+                        </a>
                         <a href="/admin/settings" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-slate-50 transition-colors">
                             <i class="fa-solid fa-gear text-gray-500 w-4"></i> Site Settings
                         </a>

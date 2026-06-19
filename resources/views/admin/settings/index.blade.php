@@ -134,6 +134,44 @@
                     </div>
                 </div>
 
+                {{-- BANK / WALLET ACCOUNTS (Manual Payments) --}}
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="font-bold text-lg text-gray-800 mb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-building-columns text-[#0A3A7A]"></i> Bank / Wallet Accounts
+                    </h3>
+                    <p class="text-xs text-gray-400 mb-4">Shown to customers on the manual payment page so they know where to send money.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-600 mb-1">Bank Name</label>
+                            <input type="text" name="bank_name" value="{{ $settings['bank_name'] ?? '' }}" placeholder="e.g. Meezan Bank" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-600 mb-1">Account Title</label>
+                            <input type="text" name="bank_account_title" value="{{ $settings['bank_account_title'] ?? '' }}" placeholder="Account holder name" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-600 mb-1">Account Number</label>
+                            <input type="text" name="bank_account_number" value="{{ $settings['bank_account_number'] ?? '' }}" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-600 mb-1">IBAN</label>
+                            <input type="text" name="bank_iban" value="{{ $settings['bank_iban'] ?? '' }}" placeholder="PK00XXXX0000000000000000" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-600 mb-1"><i class="fa-solid fa-mobile-screen text-orange-500 mr-1"></i> JazzCash Number</label>
+                            <input type="text" name="jazzcash_number" value="{{ $settings['jazzcash_number'] ?? '' }}" placeholder="03XXXXXXXXX" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-600 mb-1"><i class="fa-solid fa-mobile-screen text-green-600 mr-1"></i> EasyPaisa Number</label>
+                            <input type="text" name="easypaisa_number" value="{{ $settings['easypaisa_number'] ?? '' }}" placeholder="03XXXXXXXXX" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-gray-600 mb-1">Extra Instructions</label>
+                            <textarea name="payment_instructions" rows="2" placeholder="e.g. After paying, upload your screenshot below. Bookings are confirmed within a few hours." class="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none">{{ $settings['payment_instructions'] ?? '' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
                 {{-- SAVE BUTTON --}}
                 <div class="flex justify-end">
                     <button type="submit" class="bg-[#0A3A7A] text-white px-8 py-3 rounded-xl font-bold hover:bg-[#0D4E9A] transition-colors shadow-lg">

@@ -174,17 +174,23 @@
                                         <div class="bg-amber-50 text-amber-600 px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest border border-amber-100 flex items-center gap-2">
                                             <i class="fa-solid fa-hourglass-start animate-spin-slow"></i> Request Pending
                                         </div>
-                                    @elseif(!$booking->payment || $booking->payment->status !== 'completed')
-                                        <form action="{{ route('payment.checkout', $booking) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all flex items-center gap-1">
-                                                <i class="fa-solid fa-credit-card"></i> Pay Now
-                                            </button>
-                                        </form>
-                                    @else
+                                    @elseif($booking->payment && $booking->payment->status === 'completed')
                                         <span class="text-green-600 font-bold text-xs flex items-center gap-1">
                                             <i class="fa-solid fa-circle-check"></i> Paid
                                         </span>
+                                    @elseif($booking->payment && $booking->payment->status === 'awaiting_verification')
+                                        <span class="text-amber-600 font-bold text-xs flex items-center gap-1">
+                                            <i class="fa-solid fa-hourglass-half"></i> Verifying Payment
+                                        </span>
+                                    @else
+                                        @if($booking->payment && $booking->payment->status === 'failed')
+                                            <span class="text-red-500 font-bold text-[10px] flex items-center gap-1" title="{{ $booking->payment->admin_notes }}">
+                                                <i class="fa-solid fa-circle-xmark"></i> Rejected
+                                            </span>
+                                        @endif
+                                        <a href="{{ route('payment.manual', $booking) }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all flex items-center gap-1">
+                                            <i class="fa-solid fa-credit-card"></i> Pay Now
+                                        </a>
                                     @endif
                                     <a href="{{ route('messages.index', $booking->service->user) }}" class="text-indigo-600 font-bold hover:underline flex items-center gap-1">
                                         <i class="fa-solid fa-message text-[10px]"></i> Message Vendor
