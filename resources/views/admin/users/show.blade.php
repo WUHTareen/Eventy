@@ -95,13 +95,14 @@
                         <button type="submit" class="bg-[#0A3A7A] text-white px-6 py-2.5 rounded-xl font-bold hover:bg-[#0D4E9A] transition">
                             <i class="fa-solid fa-save mr-1"></i> Save Changes
                         </button>
-                        <form action="{{ route('admin.users.destroy', $user) }}" method="POST" onsubmit="return confirm('Delete this user permanently?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="bg-red-50 text-red-600 hover:bg-red-100 px-6 py-2.5 rounded-xl font-bold transition">
-                                <i class="fa-solid fa-trash mr-1"></i> Delete User
-                            </button>
-                        </form>
                     </div>
+                </form>
+
+                <form action="{{ route('admin.users.destroy', $user) }}" method="POST" onsubmit="return confirm('Delete this user permanently? This cannot be undone.')" class="mt-3">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="bg-red-50 text-red-600 hover:bg-red-100 px-6 py-2.5 rounded-xl font-bold transition">
+                        <i class="fa-solid fa-trash mr-1"></i> Delete User
+                    </button>
                 </form>
             </div>
 
