@@ -71,17 +71,34 @@ class PaymentController extends Controller
     }
 
     /**
+     * Authorize access to a booking's payment for either the logged-in
+     * owner, or a guest presenting the booking's tracking token.
+     */
+    private function authorizeBookingAccess(Request $request, Booking $booking): void
+    {
+        if (Auth::id() === $booking->user_id && Auth::id() !== null) {
+            return;
+        }
+
+        $token = $request->query('token') ?? $request->input('token');
+        if ($booking->user_id === null && $token && $token === $booking->tracking_token) {
+            return;
+        }
+
+        abort(403);
+    }
+
+    /**
      * Show the manual / bank transfer payment page where the customer can
      * see the platform's account details and upload proof of payment.
      */
-    public function showManual(Booking $booking)
+    public function showManual(Request $request, Booking $booking)
     {
-        if (Auth::id() !== $booking->user_id) {
-            abort(403);
-        }
+        $this->authorizeBookingAccess($request, $booking);
 
         if ($booking->payment && $booking->payment->status === 'completed') {
-            return redirect()->route('bookings.index')->with('error', 'This booking is already paid.');
+            $redirect = $booking->user_id ? redirect()->route('bookings.index') : redirect()->route('bookings.track', ['booking' => $booking->id, 'token' => $booking->tracking_token]);
+            return $redirect->with('error', 'This booking is already paid.');
         }
 
         $accounts = [
@@ -95,8 +112,9 @@ class PaymentController extends Controller
         ];
 
         $amount = $booking->total_price ?: optional($booking->service)->price;
+        $token = $request->query('token');
 
-        return view('bookings.pay-manual', compact('booking', 'accounts', 'amount'));
+        return view('bookings.pay-manual', compact('booking', 'accounts', 'amount', 'token'));
     }
 
     /**
@@ -105,12 +123,11 @@ class PaymentController extends Controller
      */
     public function submitManual(Request $request, Booking $booking)
     {
-        if (Auth::id() !== $booking->user_id) {
-            abort(403);
-        }
+        $this->authorizeBookingAccess($request, $booking);
 
         if ($booking->payment && $booking->payment->status === 'completed') {
-            return redirect()->route('bookings.index')->with('error', 'This booking is already paid.');
+            $redirect = $booking->user_id ? redirect()->route('bookings.index') : redirect()->route('bookings.track', ['booking' => $booking->id, 'token' => $booking->tracking_token]);
+            return $redirect->with('error', 'This booking is already paid.');
         }
 
         $validated = $request->validate([
@@ -127,7 +144,7 @@ class PaymentController extends Controller
         Payment::updateOrCreate(
             ['booking_id' => $booking->id],
             [
-                'user_id'               => Auth::id(),
+                'user_id'               => $booking->user_id ?? Auth::id(),
                 'amount'                => $amount,
                 'currency'              => 'PKR',
                 'status'                => 'awaiting_verification',
@@ -151,7 +168,12 @@ class PaymentController extends Controller
             );
         }
 
-        return redirect()->route('bookings.index')
+        if ($booking->user_id) {
+            return redirect()->route('bookings.index')
+                ->with('success', 'Payment proof submitted! Our team will verify it shortly.');
+        }
+
+        return redirect()->route('bookings.track', ['booking' => $booking->id, 'token' => $booking->tracking_token])
             ->with('success', 'Payment proof submitted! Our team will verify it shortly.');
     }
 

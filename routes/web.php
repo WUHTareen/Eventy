@@ -86,19 +86,22 @@ Route::get('/packages/{package}', [CustomPackageController::class, 'show'])->nam
 Route::get('/services/{service}/book', [BookingController::class, 'create'])->name('services.book');
 Route::post('/services/{service}/book', [BookingController::class, 'store'])->name('services.store_booking');
 
+// Guest booking tracking — token-gated, no login required
+Route::get('/bookings/{booking}/track', [BookingController::class, 'track'])->name('bookings.track');
+
+// Manual / Bank Transfer payments — open to guests (token-gated) and logged-in customers
+Route::get('/bookings/{booking}/pay/manual', [\App\Http\Controllers\PaymentController::class, 'showManual'])->name('payment.manual');
+Route::post('/bookings/{booking}/pay/manual', [\App\Http\Controllers\PaymentController::class, 'submitManual'])->name('payment.manual.submit');
+
 // User Booking Routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/my-bookings', [BookingController::class, 'index'])->name('bookings.index');
     Route::get('/bookings/{booking}/invoice', [BookingController::class, 'downloadInvoice'])->name('bookings.invoice');
-    
+
     // Payments
     Route::post('/bookings/{booking}/pay', [\App\Http\Controllers\PaymentController::class, 'createCheckoutSession'])->name('payment.checkout');
     Route::get('/payment/success/{booking}', [\App\Http\Controllers\PaymentController::class, 'success'])->name('payment.success');
     Route::get('/payment/cancel/{booking}', [\App\Http\Controllers\PaymentController::class, 'cancel'])->name('payment.cancel');
-
-    // Manual / Bank Transfer payments
-    Route::get('/bookings/{booking}/pay/manual', [\App\Http\Controllers\PaymentController::class, 'showManual'])->name('payment.manual');
-    Route::post('/bookings/{booking}/pay/manual', [\App\Http\Controllers\PaymentController::class, 'submitManual'])->name('payment.manual.submit');
 
     Route::post('/bookings/{booking}/reviews', [\App\Http\Controllers\ReviewController::class, 'store'])->name('bookings.reviews.store');
     Route::post('/reviews/{review}/reply', [\App\Http\Controllers\ReviewController::class, 'reply'])->name('reviews.reply');

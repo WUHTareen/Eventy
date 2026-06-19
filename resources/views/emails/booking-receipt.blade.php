@@ -88,7 +88,11 @@
             </div>
             
             <p class="p" style="text-align: center;">
-                <a href="{{ route('bookings.index') }}" class="btn">View My Bookings</a>
+                @if($booking->user_id)
+                    <a href="{{ route('bookings.index') }}" class="btn">View My Bookings</a>
+                @else
+                    <a href="{{ route('bookings.track', ['booking' => $booking->id, 'token' => $booking->tracking_token]) }}" class="btn">Track Your Booking &amp; Pay</a>
+                @endif
             </p>
         </div>
         

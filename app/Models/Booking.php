@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Booking extends Model
 {
     protected $fillable = [
+        'tracking_token',
         'user_id',
         'service_id',
         'vendor_id',

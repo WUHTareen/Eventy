@@ -10,6 +10,7 @@ use App\Models\Notification;
 use App\Models\Coupon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\BookingReceipt;
 use App\Mail\BookingNotification;
@@ -198,6 +199,7 @@ class BookingController extends Controller
 
                 // 6. Create Booking Record
                 $booking = Booking::create([
+                    'tracking_token' => Str::random(48),
                     'user_id' => Auth::id(),
                     'service_id' => $service->id,
                     'vendor_id' => $service->user_id,
@@ -316,7 +318,29 @@ class BookingController extends Controller
             \Illuminate\Support\Facades\Log::error('Admin notification mail failed: ' . $e->getMessage());
         }
 
-        return redirect()->route('home')->with('success', 'Thank you! Your booking protocol has been initiated safely.');
+        if (Auth::check()) {
+            return redirect()->route('home')->with('success', 'Thank you! Your booking protocol has been initiated safely.');
+        }
+
+        // Guests have no login, so send them to a public tracking page
+        // (also emailed to them) where they can check status and pay.
+        return redirect()->route('bookings.track', ['booking' => $booking->id, 'token' => $booking->tracking_token])
+            ->with('success', 'Thank you! Your booking has been received. Save this link to track it or pay.');
+    }
+
+    /**
+     * Public booking status/payment page for guests who booked without an account.
+     * Access is gated by the per-booking tracking token, not auth.
+     */
+    public function track(Request $request, Booking $booking)
+    {
+        if (! $request->query('token') || $request->query('token') !== $booking->tracking_token) {
+            abort(403);
+        }
+
+        $booking->load(['service', 'payment']);
+
+        return view('bookings.track', compact('booking'));
     }
 
     /**

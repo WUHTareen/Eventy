@@ -1,15 +1,33 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex items-center gap-3">
-            <a href="{{ route('bookings.index') }}" class="text-gray-400 hover:text-gray-700">
-                <i class="fa-solid fa-arrow-left"></i>
-            </a>
-            <h2 class="font-bold text-2xl text-gray-800 leading-tight">{{ __('Complete Your Payment') }}</h2>
-        </div>
-    </x-slot>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Complete Your Payment | Eventy.pk</title>
+    <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] } } }
+        };
+    </script>
+</head>
+<body class="font-sans antialiased bg-slate-50 min-h-screen">
 
-    <div class="py-8 bg-gradient-to-b from-slate-50 to-white min-h-screen">
+    <div class="py-8">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <div class="flex items-center gap-3 mb-6">
+                @if($booking->user_id)
+                    <a href="{{ route('bookings.index') }}" class="text-gray-400 hover:text-gray-700">
+                @else
+                    <a href="{{ route('bookings.track', ['booking' => $booking->id, 'token' => $token]) }}" class="text-gray-400 hover:text-gray-700">
+                @endif
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                <h2 class="font-bold text-2xl text-gray-800 leading-tight">Complete Your Payment</h2>
+            </div>
 
             @if ($errors->any())
                 <div class="bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-2xl mb-6">
@@ -85,7 +103,7 @@
                     <i class="fa-solid fa-receipt text-indigo-500"></i> Upload payment proof
                 </h3>
 
-                <form action="{{ route('payment.manual.submit', $booking) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                <form action="{{ route('payment.manual.submit', $booking) }}{{ $token ? '?token='.$token : '' }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                     @csrf
 
                     <div>
@@ -99,7 +117,7 @@
 
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">Sender name <span class="text-red-400">*</span></label>
-                        <input type="text" name="sender_name" value="{{ old('sender_name', auth()->user()->name) }}" required
+                        <input type="text" name="sender_name" value="{{ old('sender_name', auth()->check() ? auth()->user()->name : $booking->customer_name) }}" required
                                class="w-full rounded-xl border-gray-200 focus:border-indigo-400 focus:ring-indigo-400 text-sm" placeholder="Name on the sending account">
                     </div>
 
@@ -124,4 +142,5 @@
 
         </div>
     </div>
-</x-app-layout>
+</body>
+</html>
