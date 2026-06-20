@@ -217,6 +217,10 @@ Route::delete('/services/{service}', [AdminController::class, 'deleteService'])-
     Route::get('/settings', [\App\Http\Controllers\Admin\SiteSettingController::class, 'index'])->name('settings.index');
     Route::put('/settings', [\App\Http\Controllers\Admin\SiteSettingController::class, 'update'])->name('settings.update');
 
+    // Homepage Content (CMS)
+    Route::get('/homepage', [\App\Http\Controllers\Admin\HomepageController::class, 'edit'])->name('homepage.edit');
+    Route::post('/homepage', [\App\Http\Controllers\Admin\HomepageController::class, 'update'])->name('homepage.update');
+
     // Blog Management
     Route::resource('blog', \App\Http\Controllers\Admin\BlogController::class);
     Route::patch('/blog/{blog}/toggle-publish', [\App\Http\Controllers\Admin\BlogController::class, 'togglePublish'])->name('blog.toggle-publish');

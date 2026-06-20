@@ -86,6 +86,9 @@
                                     </button>
                                 </x-slot>
                                 <x-slot name="content">
+                                    <x-dropdown-link :href="route('admin.homepage.edit')">
+                                        <i class="fa-solid fa-house-laptop mr-2 text-gray-400"></i> {{ __('Homepage Content') }}
+                                    </x-dropdown-link>
                                     <x-dropdown-link :href="route('admin.cities.index')">
                                         <i class="fa-solid fa-city mr-2 text-gray-400"></i> {{ __('Cities') }}
                                     </x-dropdown-link>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Service;
 use App\Models\User;
 use App\Models\Booking;
+use App\Http\Controllers\Admin\HomepageController;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -197,15 +198,34 @@ class HomeController extends Controller
             ]
         ];
         
+        // Admin-managed testimonials override the defaults above when configured.
+        $dbTestimonials = \App\Models\Testimonial::all();
+        if ($dbTestimonials->isNotEmpty()) {
+            $colors = ['bg-purple-100 text-purple-600', 'bg-blue-100 text-blue-600', 'bg-pink-100 text-pink-600', 'bg-green-100 text-green-600', 'bg-orange-100 text-orange-600'];
+            $testimonialSlides = $dbTestimonials->map(function($t, $i) use ($colors) {
+                return [
+                    'stars'   => $t->stars,
+                    'quote'   => $t->quote,
+                    'name'    => $t->name,
+                    'role'    => $t->role,
+                    'initial' => strtoupper(substr($t->name, 0, 1)),
+                    'color'   => $colors[$i % count($colors)],
+                ];
+            })->all();
+        }
+
+        // Homepage CMS content (hero, section headings, steps, CTA) with defaults.
+        $hp = HomepageController::content();
+
         if ($request->header('X-Partial') === 'stats') {
             return view('partials.home-stats', compact('stats'));
         }
-        
+
         if ($request->ajax()) {
             return view('partials.home-marketplace', compact('pakistanServices', 'globalServices', 'isSearching'));
         }
 
-        return view('welcome', compact('pakistanServices', 'globalServices', 'stats', 'categories', 'featureCards', 'testimonialSlides', 'customPackages', 'cities', 'isSearching'));
+        return view('welcome', compact('pakistanServices', 'globalServices', 'stats', 'categories', 'featureCards', 'testimonialSlides', 'customPackages', 'cities', 'isSearching', 'hp'));
     }
 
     public function searchSuggestions(Request $request)

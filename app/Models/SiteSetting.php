@@ -23,4 +23,17 @@ class SiteSetting extends Model
     {
         return static::all()->pluck('value', 'key')->toArray();
     }
+
+    public static function getJson($key, $default = [])
+    {
+        $value = static::get($key);
+        if (!$value) return $default;
+        $decoded = json_decode($value, true);
+        return is_array($decoded) ? $decoded : $default;
+    }
+
+    public static function setJson($key, $value)
+    {
+        return static::set($key, json_encode(array_values($value)));
+    }
 }

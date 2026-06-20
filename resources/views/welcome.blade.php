@@ -174,8 +174,8 @@
             <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] translate-x-1/2 -translate-y-1/2"></div>
             <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#ED1C24]/10 rounded-full blur-[120px] -translate-x-1/2 translate-y-1/2"></div>
             
-            <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=2074&auto=format&fit=crop" 
-                 alt="Strategic Orchestration" 
+            <img src="{{ !empty($hp['hp_hero_image']) ? asset('storage/' . $hp['hp_hero_image']) : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=2074&auto=format&fit=crop' }}"
+                 alt="Strategic Orchestration"
                  class="absolute inset-0 w-full h-full object-cover opacity-10 filter grayscale contrast-125">
             <div class="absolute inset-0 bg-gradient-to-b from-[#0A192F]/50 via-[#0A192F]/80 to-[#0A192F]"></div>
         </div>
@@ -183,18 +183,18 @@
         <div class="relative z-30 max-w-[1400px] mx-auto px-4 md:px-6 text-center">
             <div class="inline-flex items-center gap-3 bg-white/5 backdrop-blur-2xl px-4 py-1.5 rounded-full border border-white/10 mb-8 transform hover:scale-105 transition-all cursor-default group">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#ED1C24] group-hover:animate-ping"></span>
-                <span class="text-[9px] md:text-[10px] font-bold text-white uppercase tracking-[0.2em] font-friendly">Your Trusted Event Partner</span>
+                <span class="text-[9px] md:text-[10px] font-bold text-white uppercase tracking-[0.2em] font-friendly">{{ $hp['hp_hero_badge'] ?? 'Your Trusted Event Partner' }}</span>
             </div>
 
             <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-black text-white tracking-tight uppercase leading-[1.1] mb-6 font-friendly px-4">
-                Plan, Book & Manage <br class="hidden md:block"/>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#ED1C24] via-white to-blue-400">Events, Travel & Hospitality</span>
+                {{ $hp['hp_hero_title_1'] ?? 'Plan, Book & Manage' }} <br class="hidden md:block"/>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#ED1C24] via-white to-blue-400">{{ $hp['hp_hero_title_2'] ?? 'Events, Travel & Hospitality' }}</span>
                 <br class="hidden md:block"/>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-white">— Worldwide</span>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-white">{{ $hp['hp_hero_title_3'] ?? '— Worldwide' }}</span>
             </h1>
-            
+
             <p class="text-blue-100/70 text-sm md:text-lg font-medium leading-relaxed max-w-2xl mx-auto mb-8 md:mb-12 font-friendly">
-                From Weddings to Corporate Conferences, From Hotels to Visa & Transport — All in One Platform
+                {{ $hp['hp_hero_subtitle'] ?? 'From Weddings to Corporate Conferences, From Hotels to Visa & Transport — All in One Platform' }}
             </p>
 
                         <!-- Audience Selection (Portals) -->
@@ -1204,16 +1204,17 @@
     </div>
     @endif
     <!-- Elite Asset Deployment (Featured Selections) -->
+    @if(($hp['hp_featured_show'] ?? '1') === '1')
     <div class="py-24 bg-white relative overflow-hidden">
         <div class="max-w-[1400px] mx-auto px-6 md:px-12 relative z-10">
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-10 mb-12">
                 <div class="space-y-4">
-                    <div class="inline-flex items-center gap-3 bg-[#ED1C24]/10 px-6 py-2 rounded-full border border-[#ED1C24]/10 font-black text-[10px] text-[#ED1C24] uppercase tracking-[0.4em]">High-Value Intelligence</div>
+                    <div class="inline-flex items-center gap-3 bg-[#ED1C24]/10 px-6 py-2 rounded-full border border-[#ED1C24]/10 font-black text-[10px] text-[#ED1C24] uppercase tracking-[0.4em]">{{ $hp['hp_featured_badge'] ?? 'High-Value Intelligence' }}</div>
                     <h2 class="text-4xl md:text-5xl font-black text-[#0A192F] uppercase tracking-tighter leading-none">
-                        Featured <span class="text-[#ED1C24]">Assets</span>
+                        {{ $hp['hp_featured_title'] ?? 'Featured' }} <span class="text-[#ED1C24]">{{ $hp['hp_featured_title_hl'] ?? 'Assets' }}</span>
                     </h2>
                     <p class="text-lg text-gray-400 font-medium uppercase tracking-widest max-w-2xl">
-                        "Pre-vetted elite protocols for specialized event architectures and high-stakes travel."
+                        "{{ $hp['hp_featured_subtitle'] ?? 'Pre-vetted elite protocols for specialized event architectures and high-stakes travel.' }}"
                     </p>
                 </div>
                 <div class="shrink-0 pb-2">
@@ -1278,6 +1279,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     <!-- Strategic Corporate Solutions (Elite Redesign) -->
     <div class="py-24 bg-[#F8FAFC] relative overflow-hidden">
@@ -1420,12 +1422,13 @@
     </div>
 
     <!-- Operational Logic (How It Works) -->
+    @if(($hp['hp_how_show'] ?? '1') === '1')
     <div class="py-24 bg-white relative overflow-hidden">
         <div class="max-w-[1400px] mx-auto px-6 md:px-12 relative z-10">
             <div class="text-center mb-16">
-                <h4 class="text-[10px] font-black text-[#ED1C24] uppercase tracking-[0.8em] mb-4">Strategic Workflow</h4>
+                <h4 class="text-[10px] font-black text-[#ED1C24] uppercase tracking-[0.8em] mb-4">{{ $hp['hp_how_badge'] ?? 'Strategic Workflow' }}</h4>
                 <h2 class="text-4xl md:text-5xl font-black text-[#0A192F] uppercase tracking-tighter leading-none mb-6">
-                    Process <span class="text-[#ED1C24]">Architecture</span>
+                    {{ $hp['hp_how_title'] ?? 'Process' }} <span class="text-[#ED1C24]">{{ $hp['hp_how_title_hl'] ?? 'Architecture' }}</span>
                 </h2>
                 <div class="w-20 h-1.5 bg-gradient-to-r from-[#ED1C24] to-[#0A3A7A] mx-auto rounded-full"></div>
             </div>
@@ -1434,16 +1437,7 @@
                 <!-- Connecting Line -->
                 <div class="absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-gray-100 to-transparent -translate-y-1/2 hidden md:block"></div>
 
-                @php
-                    $steps = [
-                        ['id' => '01', 'title' => 'Define Parameters', 'desc' => 'Identify target goals, logistics needs, and asset requirements.', 'icon' => 'fa-crosshairs'],
-                        ['id' => '02', 'title' => 'Asset Selection', 'desc' => 'Deploy pre-vetted vendors and high-fidelity service protocols.', 'icon' => 'fa-database'],
-                        ['id' => '03', 'title' => 'Secure Checkout', 'desc' => 'Intel-grade escrow payments and encrypted transaction seals.', 'icon' => 'fa-shield-halved'],
-                        ['id' => '04', 'title' => 'Live Orchestration', 'desc' => 'Real-time deployment tracking and mission command support.', 'icon' => 'fa-tower-broadcast'],
-                    ];
-                @endphp
-
-                @foreach($steps as $step)
+                @foreach(($hp['hp_steps'] ?? []) as $step)
                 <div class="group relative flex flex-col items-center text-center space-y-8">
                     <div class="w-24 h-24 rounded-[2rem] bg-[#F8FAFC] border border-gray-100 flex items-center justify-center text-3xl text-[#0A192F] group-hover:bg-[#0A192F] group-hover:text-white transition-all duration-700 shadow-xl group-hover:shadow-[#0A192F]/20 relative z-10">
                         <i class="fa-solid {{ $step['icon'] }}"></i>
@@ -1464,16 +1458,17 @@
                 <div class="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-[#ED1C24]/10 to-transparent opacity-50"></div>
                 
                 <div class="relative z-10 space-y-4">
-                    <h3 class="text-2xl md:text-4xl font-black text-white uppercase tracking-tighter leading-none">Are you an <br/><span class="text-[#ED1C24]">Organization?</span></h3>
-                    <p class="text-blue-100/40 text-base font-medium ">"Join our corporate ecosystem for specialized handling and bulk assets."</p>
+                    <h3 class="text-2xl md:text-4xl font-black text-white uppercase tracking-tighter leading-none">{{ $hp['hp_cta_title'] ?? 'Are you an' }} <br/><span class="text-[#ED1C24]">{{ $hp['hp_cta_title_hl'] ?? 'Organization?' }}</span></h3>
+                    <p class="text-blue-100/40 text-base font-medium ">"{{ $hp['hp_cta_subtitle'] ?? 'Join our corporate ecosystem for specialized handling and bulk assets.' }}"</p>
                 </div>
                 <div class="flex flex-wrap gap-4 relative z-10">
-                    <a href="{{ route('corporate') }}" class="px-8 py-4 bg-[#ED1C24] text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-[#ED1C24]/20 hover:scale-110 active:scale-95 transition-all">Corporate Portal</a>
-                    <a href="{{ route('contact') }}" class="px-8 py-4 bg-white/5 border border-white/10 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all">Request Briefing</a>
+                    <a href="{{ route('corporate') }}" class="px-8 py-4 bg-[#ED1C24] text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-[#ED1C24]/20 hover:scale-110 active:scale-95 transition-all">{{ $hp['hp_cta_btn1'] ?? 'Corporate Portal' }}</a>
+                    <a href="{{ route('contact') }}" class="px-8 py-4 bg-white/5 border border-white/10 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all">{{ $hp['hp_cta_btn2'] ?? 'Request Briefing' }}</a>
                 </div>
             </div>
         </div>
     </div>
+    @endif
 
 
     <!-- Service Solutions (Expanded Elite Grid) -->
@@ -1876,16 +1871,17 @@
     </div>
 
     <!-- Partner Intel (Testimonials) -->
+    @if(($hp['hp_testi_show'] ?? '1') === '1' && count($testimonialSlides))
     <div class="py-16 bg-white relative overflow-hidden">
         <div class="max-w-[1400px] mx-auto px-6 md:px-12 relative z-10">
             <div class="flex flex-col lg:flex-row items-end justify-between mb-12 gap-12">
                 <div class="space-y-4 text-center lg:text-left">
-                    <div class="inline-flex items-center gap-3 bg-[#ED1C24]/10 px-6 py-2 rounded-full border border-[#ED1C24]/10 font-black text-[9px] text-[#ED1C24] uppercase tracking-[0.4em]">Community Intel</div>
+                    <div class="inline-flex items-center gap-3 bg-[#ED1C24]/10 px-6 py-2 rounded-full border border-[#ED1C24]/10 font-black text-[9px] text-[#ED1C24] uppercase tracking-[0.4em]">{{ $hp['hp_testi_badge'] ?? 'Community Intel' }}</div>
                     <h2 class="text-3xl md:text-5xl font-black text-[#0A192F] uppercase tracking-tighter leading-none">
-                        Success <span class="text-[#ED1C24]">Metrics</span>
+                        {{ $hp['hp_testi_title'] ?? 'Success' }} <span class="text-[#ED1C24]">{{ $hp['hp_testi_title_hl'] ?? 'Metrics' }}</span>
                     </h2>
                     <p class="text-base text-gray-400 font-medium uppercase tracking-widest max-w-2xl">
-                        "Verified feedback from Pakistan's most prominent event architectures and corporate summits."
+                        "{{ $hp['hp_testi_subtitle'] ?? 'Verified feedback from Pakistan\'s most prominent event architectures and corporate summits.' }}"
                     </p>
                 </div>
             </div>
@@ -1923,6 +1919,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
