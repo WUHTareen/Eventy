@@ -88,8 +88,29 @@
                                         <div class="mt-1">
                                             @if($booking->payment && $booking->payment->status === 'completed')
                                                 <span class="text-[10px] font-bold text-green-600 uppercase">Paid</span>
+                                            @elseif($booking->payment && $booking->payment->status === 'awaiting_verification')
+                                                <span class="text-[10px] font-bold text-amber-600 uppercase">Verify Needed</span>
+                                            @elseif($booking->payment && $booking->payment->status === 'failed')
+                                                <span class="text-[10px] font-bold text-red-500 uppercase">Rejected</span>
                                             @else
                                                 <span class="text-[10px] font-bold text-gray-400 uppercase">Unpaid</span>
+                                            @endif
+
+                                            @if($booking->payment && $booking->payment->status === 'completed')
+                                                <div class="mt-1 flex justify-center gap-1">
+                                                    <form action="{{ route('admin.payments.unverify', $booking->payment) }}" method="POST" onsubmit="return confirm('Revert this payment back to awaiting verification?')">
+                                                        @csrf @method('PUT')
+                                                        <button type="submit" class="text-[9px] font-black uppercase tracking-tighter bg-amber-50 hover:bg-amber-100 text-amber-600 px-2 py-0.5 rounded border border-amber-100">
+                                                            <i class="fa-solid fa-rotate-left"></i> Un-verify
+                                                        </button>
+                                                    </form>
+                                                    <form action="{{ route('admin.payments.reject', $booking->payment) }}" method="POST" onsubmit="return confirm('Mark this payment as rejected/refunded?')">
+                                                        @csrf @method('PUT')
+                                                        <button type="submit" class="text-[9px] font-black uppercase tracking-tighter bg-red-50 hover:bg-red-100 text-red-600 px-2 py-0.5 rounded border border-red-100">
+                                                            <i class="fa-solid fa-xmark"></i> Reject
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             @endif
                                         </div>
                                     </td>
