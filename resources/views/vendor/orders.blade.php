@@ -118,6 +118,10 @@
                                             <div class="mt-2 text-[10px] font-black uppercase tracking-tighter">
                                                 @if($booking->payment && $booking->payment->status === 'completed')
                                                     <span class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100"><i class="fa-solid fa-check-circle"></i> Paid</span>
+                                                @elseif($booking->payment && $booking->payment->status === 'awaiting_verification')
+                                                    <span class="text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-100"><i class="fa-solid fa-hourglass-half"></i> Verify Needed</span>
+                                                @elseif($booking->payment && $booking->payment->status === 'failed')
+                                                    <span class="text-red-500 bg-red-50 px-2 py-0.5 rounded border border-red-100"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>
                                                 @else
                                                     <span class="text-gray-400 bg-gray-50 px-2 py-0.5 rounded border border-gray-100"><i class="fa-solid fa-clock"></i> Unpaid</span>
                                                 @endif
@@ -158,6 +162,41 @@
                                                             Mark Complete
                                                         </button>
                                                     </form>
+                                                @endif
+
+                                                @if($booking->payment && $booking->payment->status === 'awaiting_verification')
+                                                    <div class="mt-2 w-full bg-amber-50 border border-amber-100 rounded-xl p-3 text-left">
+                                                        <p class="text-[10px] font-black uppercase tracking-widest text-amber-700 mb-2">
+                                                            <i class="fa-solid fa-hourglass-half"></i> Payment Awaiting Verification
+                                                        </p>
+                                                        <div class="text-[11px] text-gray-600 space-y-0.5 mb-2">
+                                                            <div><span class="text-gray-400">Method:</span> <span class="font-bold capitalize">{{ $booking->payment->payment_method }}</span></div>
+                                                            <div><span class="text-gray-400">Sender:</span> <span class="font-bold">{{ $booking->payment->sender_name ?? '—' }}</span></div>
+                                                            @if($booking->payment->transaction_reference)
+                                                                <div><span class="text-gray-400">Ref:</span> <span class="font-bold">{{ $booking->payment->transaction_reference }}</span></div>
+                                                            @endif
+                                                            <div><span class="text-gray-400">Amount:</span> <span class="font-bold text-emerald-600">PKR {{ number_format($booking->payment->amount) }}</span></div>
+                                                        </div>
+                                                        <div class="flex flex-wrap gap-2">
+                                                            @if($booking->payment->payment_proof)
+                                                                <a href="{{ asset('storage/' . $booking->payment->payment_proof) }}" target="_blank" class="text-[10px] font-bold bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 px-3 py-1.5 rounded-lg">
+                                                                    <i class="fa-solid fa-image"></i> View Proof
+                                                                </a>
+                                                            @endif
+                                                            <form action="{{ route('vendor.orders.payment.verify', $booking->id) }}" method="POST" onsubmit="return confirm('Verify this payment as received?')">
+                                                                @csrf @method('PUT')
+                                                                <button type="submit" class="text-[10px] font-bold bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg">
+                                                                    <i class="fa-solid fa-check"></i> Verify
+                                                                </button>
+                                                            </form>
+                                                            <form action="{{ route('vendor.orders.payment.reject', $booking->id) }}" method="POST" onsubmit="return confirm('Reject this payment proof?')">
+                                                                @csrf @method('PUT')
+                                                                <button type="submit" class="text-[10px] font-bold bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg">
+                                                                    <i class="fa-solid fa-xmark"></i> Reject
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
                                                 @endif
                                             </div>
                                         </td>

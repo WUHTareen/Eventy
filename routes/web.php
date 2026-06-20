@@ -154,6 +154,8 @@ Route::middleware(['auth', 'role:vendor'])->prefix('vendor')->name('vendor.')->g
     Route::get('/orders', [BookingController::class, 'vendorIndex'])->name('orders');
     Route::get('/custom-orders', [VendorController::class, 'customOrders'])->name('custom-orders');
     Route::patch('/orders/{booking}/status', [BookingController::class, 'updateStatus'])->name('orders.update');
+    Route::put('/orders/{booking}/payment/verify', [BookingController::class, 'vendorVerifyPayment'])->name('orders.payment.verify');
+    Route::put('/orders/{booking}/payment/reject', [BookingController::class, 'vendorRejectPayment'])->name('orders.payment.reject');
 });
 
 Route::middleware(['auth', 'role:corporate'])->prefix('corporate')->name('corporate.')->group(function () {

@@ -382,8 +382,73 @@ class BookingController extends Controller
     // Vendor: Manage Orders
     public function vendorIndex()
     {
-        $bookings = Auth::user()->receivedBookings()->with(['user', 'service'])->latest()->get();
+        $bookings = Auth::user()->receivedBookings()->with(['user', 'service', 'payment'])->latest()->get();
         return view('vendor.orders', compact('bookings'));
+    }
+
+    // Vendor: Verify a manual payment submitted for one of their bookings
+    public function vendorVerifyPayment(Booking $booking)
+    {
+        if (Auth::id() !== $booking->vendor_id) {
+            abort(403);
+        }
+
+        $payment = $booking->payment;
+        if (!$payment || $payment->status !== 'awaiting_verification') {
+            return redirect()->back()->with('error', 'No payment is awaiting verification for this booking.');
+        }
+
+        $payment->update([
+            'status'      => 'completed',
+            'verified_at' => now(),
+            'verified_by' => Auth::id(),
+        ]);
+
+        if ($booking->user_id) {
+            Notification::createSystemNotification(
+                $booking->user_id,
+                'Payment Confirmed',
+                "Your payment for Booking #{$booking->id} has been verified. Thank you!",
+                route('bookings.index')
+            );
+        }
+
+        return redirect()->back()->with('success', 'Payment verified successfully.');
+    }
+
+    // Vendor: Reject a manual payment submitted for one of their bookings
+    public function vendorRejectPayment(Request $request, Booking $booking)
+    {
+        if (Auth::id() !== $booking->vendor_id) {
+            abort(403);
+        }
+
+        $request->validate([
+            'admin_notes' => 'nullable|string|max:500',
+        ]);
+
+        $payment = $booking->payment;
+        if (!$payment || $payment->status !== 'awaiting_verification') {
+            return redirect()->back()->with('error', 'No payment is awaiting verification for this booking.');
+        }
+
+        $payment->update([
+            'status'      => 'failed',
+            'admin_notes' => $request->admin_notes,
+            'verified_at' => now(),
+            'verified_by' => Auth::id(),
+        ]);
+
+        if ($booking->user_id) {
+            Notification::createSystemNotification(
+                $booking->user_id,
+                'Payment Rejected',
+                "Your payment proof for Booking #{$booking->id} could not be verified. " . ($request->admin_notes ? "Reason: {$request->admin_notes}" : 'Please re-submit.'),
+                route('bookings.index')
+            );
+        }
+
+        return redirect()->back()->with('success', 'Payment rejected. Customer has been notified.');
     }
 
     // Vendor: Update Status
