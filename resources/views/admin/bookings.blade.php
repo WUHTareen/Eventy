@@ -101,6 +101,24 @@
                                             <a href="{{ route('bookings.invoice', $booking) }}" class="text-indigo-600 hover:text-indigo-900 font-bold flex items-center gap-1">
                                                 <i class="fa-solid fa-download"></i> Invoice
                                             </a>
+                                            <div x-data="{ open: false }" class="relative">
+                                                <button @click="open = !open" class="text-gray-400 hover:text-indigo-600 transition" title="Change status">
+                                                    <i class="fa-solid fa-pen-to-square"></i>
+                                                </button>
+                                                <div x-show="open" @click.away="open = false" x-cloak class="absolute right-0 mt-2 w-44 bg-white border border-gray-100 rounded-xl shadow-lg z-20 p-2 text-left">
+                                                    @foreach(['pending' => 'Mark Pending', 'confirmed' => 'Accept', 'completed' => 'Mark Completed', 'cancelled' => 'Reject / Cancel'] as $statusKey => $label)
+                                                        @if($booking->status !== $statusKey)
+                                                            <form action="{{ route('admin.bookings.status', $booking) }}" method="POST" onsubmit="return confirm('Change booking status to {{ $label }}?')">
+                                                                @csrf @method('PUT')
+                                                                <input type="hidden" name="status" value="{{ $statusKey }}">
+                                                                <button type="submit" class="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-gray-600 hover:bg-gray-50">
+                                                                    {{ $label }}
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                    @endforeach
+                                                </div>
+                                            </div>
                                             <form action="{{ route('admin.bookings.delete', $booking) }}" method="POST" onsubmit="return confirm('Move this booking to trash?')">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="text-gray-400 hover:text-red-600 transition" title="Move to trash">

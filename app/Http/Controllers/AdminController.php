@@ -311,14 +311,34 @@ class AdminController extends Controller
             'verified_by' => auth()->id(),
         ]);
 
-        Notification::createSystemNotification(
-            $payment->user_id,
-            'Payment Confirmed',
-            "Your payment for Booking #{$payment->booking_id} has been verified. Thank you!",
-            route('bookings.index')
-        );
+        if ($payment->user_id) {
+            Notification::createSystemNotification(
+                $payment->user_id,
+                'Payment Confirmed',
+                "Your payment for Booking #{$payment->booking_id} has been verified. Thank you!",
+                route('bookings.index')
+            );
+        }
 
         return back()->with('success', 'Payment verified and marked as paid.');
+    }
+
+    /**
+     * Revert a verified payment back to awaiting verification.
+     */
+    public function unverifyPayment(Payment $payment)
+    {
+        if ($payment->status !== 'completed') {
+            return back()->with('error', 'Only verified payments can be un-verified.');
+        }
+
+        $payment->update([
+            'status'      => 'awaiting_verification',
+            'verified_at' => null,
+            'verified_by' => null,
+        ]);
+
+        return back()->with('success', 'Payment reverted to awaiting verification.');
     }
 
     /**
@@ -337,14 +357,39 @@ class AdminController extends Controller
             'verified_by' => auth()->id(),
         ]);
 
-        Notification::createSystemNotification(
-            $payment->user_id,
-            'Payment Rejected',
-            "Your payment proof for Booking #{$payment->booking_id} could not be verified. " . ($request->admin_notes ? "Reason: {$request->admin_notes}" : 'Please re-submit.'),
-            route('bookings.index')
-        );
+        if ($payment->user_id) {
+            Notification::createSystemNotification(
+                $payment->user_id,
+                'Payment Rejected',
+                "Your payment proof for Booking #{$payment->booking_id} could not be verified. " . ($request->admin_notes ? "Reason: {$request->admin_notes}" : 'Please re-submit.'),
+                route('bookings.index')
+            );
+        }
 
         return back()->with('success', 'Payment rejected. Customer has been notified.');
+    }
+
+    /**
+     * Admin override for a booking's status (accept, un-accept, reject) at any stage.
+     */
+    public function updateBookingStatus(Request $request, Booking $booking)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,confirmed,completed,cancelled',
+        ]);
+
+        $booking->update(['status' => $request->status]);
+
+        if ($booking->user_id) {
+            Notification::createBookingNotification(
+                $booking->user_id,
+                'Booking Status Updated',
+                "Your booking #{$booking->id} for [" . optional($booking->service)->name . "] has been updated to: " . strtoupper($request->status) . " by the admin.",
+                route('bookings.index')
+            );
+        }
+
+        return redirect()->back()->with('success', 'Booking status updated successfully.');
     }
 }
 

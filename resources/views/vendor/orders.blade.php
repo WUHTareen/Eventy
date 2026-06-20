@@ -164,10 +164,17 @@
                                                     </form>
                                                 @endif
 
-                                                @if($booking->payment && $booking->payment->status === 'awaiting_verification')
-                                                    <div class="mt-2 w-full bg-amber-50 border border-amber-100 rounded-xl p-3 text-left">
-                                                        <p class="text-[10px] font-black uppercase tracking-widest text-amber-700 mb-2">
-                                                            <i class="fa-solid fa-hourglass-half"></i> Payment Awaiting Verification
+                                                @if($booking->payment && in_array($booking->payment->status, ['awaiting_verification', 'completed', 'failed']))
+                                                    @php
+                                                        $payStyles = [
+                                                            'awaiting_verification' => ['bg' => 'bg-amber-50 border-amber-100', 'text' => 'text-amber-700', 'icon' => 'fa-hourglass-half', 'label' => 'Payment Awaiting Verification'],
+                                                            'completed' => ['bg' => 'bg-emerald-50 border-emerald-100', 'text' => 'text-emerald-700', 'icon' => 'fa-check-circle', 'label' => 'Payment Verified'],
+                                                            'failed' => ['bg' => 'bg-red-50 border-red-100', 'text' => 'text-red-700', 'icon' => 'fa-circle-xmark', 'label' => 'Payment Rejected'],
+                                                        ][$booking->payment->status];
+                                                    @endphp
+                                                    <div class="mt-2 w-full {{ $payStyles['bg'] }} border rounded-xl p-3 text-left">
+                                                        <p class="text-[10px] font-black uppercase tracking-widest {{ $payStyles['text'] }} mb-2">
+                                                            <i class="fa-solid {{ $payStyles['icon'] }}"></i> {{ $payStyles['label'] }}
                                                         </p>
                                                         <div class="text-[11px] text-gray-600 space-y-0.5 mb-2">
                                                             <div><span class="text-gray-400">Method:</span> <span class="font-bold capitalize">{{ $booking->payment->payment_method }}</span></div>
@@ -183,18 +190,20 @@
                                                                     <i class="fa-solid fa-image"></i> View Proof
                                                                 </a>
                                                             @endif
-                                                            <form action="{{ route('vendor.orders.payment.verify', $booking->id) }}" method="POST" onsubmit="return confirm('Verify this payment as received?')">
-                                                                @csrf @method('PUT')
-                                                                <button type="submit" class="text-[10px] font-bold bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg">
-                                                                    <i class="fa-solid fa-check"></i> Verify
-                                                                </button>
-                                                            </form>
-                                                            <form action="{{ route('vendor.orders.payment.reject', $booking->id) }}" method="POST" onsubmit="return confirm('Reject this payment proof?')">
-                                                                @csrf @method('PUT')
-                                                                <button type="submit" class="text-[10px] font-bold bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg">
-                                                                    <i class="fa-solid fa-xmark"></i> Reject
-                                                                </button>
-                                                            </form>
+                                                            @if($booking->payment->status === 'awaiting_verification')
+                                                                <form action="{{ route('vendor.orders.payment.verify', $booking->id) }}" method="POST" onsubmit="return confirm('Verify this payment as received?')">
+                                                                    @csrf @method('PUT')
+                                                                    <button type="submit" class="text-[10px] font-bold bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg">
+                                                                        <i class="fa-solid fa-check"></i> Verify
+                                                                    </button>
+                                                                </form>
+                                                                <form action="{{ route('vendor.orders.payment.reject', $booking->id) }}" method="POST" onsubmit="return confirm('Reject this payment proof?')">
+                                                                    @csrf @method('PUT')
+                                                                    <button type="submit" class="text-[10px] font-bold bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg">
+                                                                        <i class="fa-solid fa-xmark"></i> Reject
+                                                                    </button>
+                                                                </form>
+                                                            @endif
                                                         </div>
                                                     </div>
                                                 @endif

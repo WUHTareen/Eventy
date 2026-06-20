@@ -184,6 +184,7 @@ Route::delete('/services/{service}', [AdminController::class, 'deleteService'])-
     Route::get('/bookings-trash', [AdminController::class, 'trashedBookings'])->name('bookings.trash');
     Route::put('/bookings/{id}/restore', [AdminController::class, 'restoreBooking'])->name('bookings.restore');
     Route::delete('/bookings/{id}/force-delete', [AdminController::class, 'forceDeleteBooking'])->name('bookings.force-delete');
+    Route::put('/bookings/{booking}/status', [AdminController::class, 'updateBookingStatus'])->name('bookings.status');
     Route::get('/users-trash', [\App\Http\Controllers\Admin\UserController::class, 'trashedUsers'])->name('users.trash');
     Route::put('/users/{id}/restore', [\App\Http\Controllers\Admin\UserController::class, 'restoreUser'])->name('users.restore');
     Route::delete('/users/{id}/force-delete', [\App\Http\Controllers\Admin\UserController::class, 'forceDeleteUser'])->name('users.force-delete');
@@ -203,6 +204,7 @@ Route::delete('/services/{service}', [AdminController::class, 'deleteService'])-
     Route::get('/payments', [AdminController::class, 'payments'])->name('payments.index');
     Route::put('/payments/{payment}/verify', [AdminController::class, 'verifyPayment'])->name('payments.verify');
     Route::put('/payments/{payment}/reject', [AdminController::class, 'rejectPayment'])->name('payments.reject');
+    Route::put('/payments/{payment}/unverify', [AdminController::class, 'unverifyPayment'])->name('payments.unverify');
 
     // Setup & Configuration
     Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);

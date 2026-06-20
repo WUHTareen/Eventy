@@ -125,6 +125,18 @@
                                                         </div>
                                                     </template>
                                                 </div>
+                                            @elseif($payment->status === 'completed')
+                                                <div class="flex justify-end items-center gap-2">
+                                                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                                                        {{ $payment->verified_at ? $payment->verified_at->format('M d, H:i') : '—' }}
+                                                    </span>
+                                                    <form action="{{ route('admin.payments.unverify', $payment) }}" method="POST" onsubmit="return confirm('Revert this payment back to awaiting verification?')">
+                                                        @csrf @method('PUT')
+                                                        <button class="bg-amber-50 hover:bg-amber-100 text-amber-600 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                                                            <i class="fa-solid fa-rotate-left"></i> Un-verify
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             @else
                                                 <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
                                                     {{ $payment->verified_at ? $payment->verified_at->format('M d, H:i') : '—' }}
