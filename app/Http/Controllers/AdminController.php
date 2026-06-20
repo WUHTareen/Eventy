@@ -159,6 +159,18 @@ class AdminController extends Controller
      */
     public function storeService(Request $request)
     {
+        // Drop empty package / add-on rows submitted by the dynamic form before validating.
+        $request->merge([
+            'packages' => collect($request->input('packages', []))
+                ->filter(fn ($p) => filled($p['name'] ?? null) || filled($p['price'] ?? null))
+                ->values()
+                ->all(),
+            'add_ons' => collect($request->input('add_ons', []))
+                ->filter(fn ($a) => filled($a['name'] ?? null) || filled($a['price'] ?? null))
+                ->values()
+                ->all(),
+        ]);
+
         $validated = $request->validate([
             'user_id'      => 'required|exists:users,id',
             'name'         => 'required|string|max:255',
