@@ -98,8 +98,17 @@
                     </div>
                 </form>
 
-                <form action="{{ route('admin.users.destroy', $user) }}" method="POST" onsubmit="return confirm('Delete this user permanently? This cannot be undone.')" class="mt-3">
+                <form action="{{ route('admin.users.destroy', $user) }}" method="POST" onsubmit="return confirm('Move this user to trash? Their services and bookings will be transferred if a target is selected.')" class="mt-3 flex items-end gap-3">
                     @csrf @method('DELETE')
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-1">Transfer data to <span class="text-gray-400 font-normal">(optional)</span></label>
+                        <select name="transfer_to" class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="">-- Don't transfer --</option>
+                            @foreach($transferTargets as $target)
+                                <option value="{{ $target->id }}">{{ $target->name }} ({{ ucfirst($target->role) }})</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <button type="submit" class="bg-red-50 text-red-600 hover:bg-red-100 px-6 py-2.5 rounded-xl font-bold transition">
                         <i class="fa-solid fa-trash mr-1"></i> Delete User
                     </button>

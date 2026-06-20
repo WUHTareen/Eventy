@@ -178,6 +178,13 @@ Route::delete('/services/{service}', [AdminController::class, 'deleteService'])-
     Route::put('/services/{id}/restore', [AdminController::class, 'restoreService'])->name('services.restore');
     Route::delete('/services/{id}/force-delete', [AdminController::class, 'forceDeleteService'])->name('services.force-delete');
     Route::get('/bookings', [AdminController::class, 'bookings'])->name('bookings');
+    Route::delete('/bookings/{booking}', [AdminController::class, 'deleteBooking'])->name('bookings.delete');
+    Route::get('/bookings-trash', [AdminController::class, 'trashedBookings'])->name('bookings.trash');
+    Route::put('/bookings/{id}/restore', [AdminController::class, 'restoreBooking'])->name('bookings.restore');
+    Route::delete('/bookings/{id}/force-delete', [AdminController::class, 'forceDeleteBooking'])->name('bookings.force-delete');
+    Route::get('/users-trash', [\App\Http\Controllers\Admin\UserController::class, 'trashedUsers'])->name('users.trash');
+    Route::put('/users/{id}/restore', [\App\Http\Controllers\Admin\UserController::class, 'restoreUser'])->name('users.restore');
+    Route::delete('/users/{id}/force-delete', [\App\Http\Controllers\Admin\UserController::class, 'forceDeleteUser'])->name('users.force-delete');
     Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
     Route::put('/users/{user}/ban', [\App\Http\Controllers\Admin\UserController::class, 'toggleBan'])->name('users.ban');
     Route::put('/users/{user}/verify', [\App\Http\Controllers\Admin\UserController::class, 'verifyVendor'])->name('users.verify');

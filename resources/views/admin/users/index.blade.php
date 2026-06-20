@@ -6,6 +6,9 @@
                 <p class="text-gray-500 text-sm mt-1">Manage all clients, vendors and admins</p>
             </div>
             <div class="flex gap-3">
+                <a href="{{ route('admin.users.trash') }}" class="bg-amber-50 text-amber-600 font-bold py-2.5 px-6 rounded-xl hover:bg-amber-100 transition flex items-center gap-2">
+                    <i class="fa-solid fa-trash-can"></i> Trash
+                </a>
                 <a href="{{ route('admin.users.create') }}" class="bg-[#0A3A7A] text-white font-bold py-2.5 px-6 rounded-xl shadow hover:bg-[#0D4E9A] transition flex items-center gap-2">
                     <i class="fa-solid fa-plus"></i> Add User
                 </a>
