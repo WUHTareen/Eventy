@@ -1282,6 +1282,7 @@
     @endif
 
     <!-- Strategic Corporate Solutions (Elite Redesign) -->
+    @if(($hp['hp_corp_show'] ?? '1') === '1')
     <div class="py-24 bg-[#F8FAFC] relative overflow-hidden">
         <!-- Background Accents -->
         <div class="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-blue-50/50 to-transparent"></div>
@@ -1290,22 +1291,27 @@
         <div class="max-w-[1400px] mx-auto px-6 md:px-12 relative z-10">
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-10 mb-16">
                 <div class="space-y-4">
-                    <div class="inline-flex items-center gap-3 bg-[#0A192F] px-6 py-2 rounded-full border border-white/10 font-black text-[9px] text-white uppercase tracking-[0.4em]">Enterprise Ecosystem</div>
+                    <div class="inline-flex items-center gap-3 bg-[#0A192F] px-6 py-2 rounded-full border border-white/10 font-black text-[9px] text-white uppercase tracking-[0.4em]">{{ $hp['hp_corp_badge'] ?? 'Enterprise Ecosystem' }}</div>
                     <h2 class="text-4xl md:text-5xl font-black text-[#0A192F] uppercase tracking-tighter leading-none">
-                        Strategic <span class="text-[#ED1C24]">Corporate</span> Solutions
+                        {{ $hp['hp_corp_title'] ?? 'Strategic' }} <span class="text-[#ED1C24]">{{ $hp['hp_corp_title_hl'] ?? 'Corporate' }}</span> {{ $hp['hp_corp_title_end'] ?? 'Solutions' }}
                     </h2>
                     <p class="text-base text-gray-400 font-bold uppercase tracking-[0.15em] max-w-xl">
-                        "Pre-Engineered Tactical Assets for Board-Level Events and Global Operations."
+                        "{{ $hp['hp_corp_subtitle'] ?? 'Pre-Engineered Tactical Assets for Board-Level Events and Global Operations.' }}"
                     </p>
                 </div>
+                @php $avatarItems = $media['avatar'] ?? collect(); @endphp
                 <div class="hidden md:flex gap-4">
                     <div class="flex flex-col items-end">
-                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Vetted Vendors</span>
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{{ $hp['hp_avatar_label'] ?? 'Vetted Vendors' }}</span>
                         <div class="flex -space-x-3">
-                            <img src="https://i.pravatar.cc/100?u=1" class="w-10 h-10 rounded-full border-2 border-white shadow-lg">
-                            <img src="https://i.pravatar.cc/100?u=2" class="w-10 h-10 rounded-full border-2 border-white shadow-lg">
-                            <img src="https://i.pravatar.cc/100?u=3" class="w-10 h-10 rounded-full border-2 border-white shadow-lg">
-                            <div class="w-10 h-10 rounded-full bg-[#ED1C24] border-2 border-white shadow-lg flex items-center justify-center text-white text-[10px] font-black">+42</div>
+                            @forelse($avatarItems->take(3) as $av)
+                                <img src="{{ $av->image ? asset('storage/' . $av->image) : 'https://i.pravatar.cc/100?u=' . $av->id }}" class="w-10 h-10 rounded-full border-2 border-white shadow-lg object-cover">
+                            @empty
+                                <img src="https://i.pravatar.cc/100?u=1" class="w-10 h-10 rounded-full border-2 border-white shadow-lg">
+                                <img src="https://i.pravatar.cc/100?u=2" class="w-10 h-10 rounded-full border-2 border-white shadow-lg">
+                                <img src="https://i.pravatar.cc/100?u=3" class="w-10 h-10 rounded-full border-2 border-white shadow-lg">
+                            @endforelse
+                            <div class="w-10 h-10 rounded-full bg-[#ED1C24] border-2 border-white shadow-lg flex items-center justify-center text-white text-[10px] font-black">{{ $hp['hp_avatar_extra'] ?? '+42' }}</div>
                         </div>
                     </div>
                 </div>
@@ -1313,45 +1319,31 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 @php
-                    $corporateServices = [
-                        [
-                            'id' => 39,
-                            'name' => 'Strategic Summit Hall (Omega Unit)',
-                            'type' => 'Executive Conference',
-                            'pax' => '500-2000 PAX',
-                            'compliance' => 'L3 Board Approved',
-                            'price' => '1,250,000',
-                            'img' => 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=2069&auto=format&fit=crop',
-                            'dept' => 'Global Logistics',
-                            'verified' => true
-                        ],
-                        [
-                            'id' => 40,
-                            'name' => 'Monarch Boardroom Protocol',
-                            'type' => 'Private Strategy Session',
-                            'pax' => '20-50 PAX',
-                            'compliance' => 'L2 Management Cleared',
-                            'price' => '250,000',
-                            'img' => 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=2069&auto=format&fit=crop',
-                            'dept' => 'Executive Suite',
-                            'verified' => true
-                        ],
-                        [
-                            'id' => 42,
-                            'name' => 'Alpha Launch Infrastructure',
-                            'type' => 'Product Activation Hub',
-                            'pax' => '1000+ PAX',
-                            'compliance' => 'L1 Operational Level',
-                            'price' => '3,500,000',
-                            'img' => 'https://images.unsplash.com/photo-1475721027187-402ad2989a38?q=80&w=2070&auto=format&fit=crop',
-                            'dept' => 'Marketing & Activation',
-                            'verified' => true
-                        ]
-                    ];
+                    $corporateCards = ($media['corporate_card'] ?? collect())->map(function($m) {
+                        return [
+                            'link' => $m->link ?: '#',
+                            'name' => $m->title,
+                            'type' => $m->subtitle,
+                            'pax' => $m->tag,
+                            'compliance' => $m->badge,
+                            'price' => $m->price,
+                            'img' => $m->image ? asset('storage/' . $m->image) : 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=2069&auto=format&fit=crop',
+                            'dept' => $m->meta['dept'] ?? '',
+                            'verified' => $m->meta['verified'] ?? false,
+                        ];
+                    })->all();
+
+                    if (empty($corporateCards)) {
+                        $corporateCards = [
+                            ['link' => route('services.show', 39), 'name' => 'Strategic Summit Hall (Omega Unit)', 'type' => 'Executive Conference', 'pax' => '500-2000 PAX', 'compliance' => 'L3 Board Approved', 'price' => '1,250,000', 'img' => 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=2069&auto=format&fit=crop', 'dept' => 'Global Logistics', 'verified' => true],
+                            ['link' => route('services.show', 40), 'name' => 'Monarch Boardroom Protocol', 'type' => 'Private Strategy Session', 'pax' => '20-50 PAX', 'compliance' => 'L2 Management Cleared', 'price' => '250,000', 'img' => 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=2069&auto=format&fit=crop', 'dept' => 'Executive Suite', 'verified' => true],
+                            ['link' => route('services.show', 42), 'name' => 'Alpha Launch Infrastructure', 'type' => 'Product Activation Hub', 'pax' => '1000+ PAX', 'compliance' => 'L1 Operational Level', 'price' => '3,500,000', 'img' => 'https://images.unsplash.com/photo-1475721027187-402ad2989a38?q=80&w=2070&auto=format&fit=crop', 'dept' => 'Marketing & Activation', 'verified' => true],
+                        ];
+                    }
                 @endphp
 
-                @foreach($corporateServices as $service)
-                <a href="{{ route('services.show', $service['id']) }}" class="group relative bg-white rounded-[2rem] overflow-hidden border border-slate-100 shadow-xl shadow-slate-200/40 hover:shadow-[#ED1C24]/10 transition-all duration-500 hover:-translate-y-3 block">
+                @foreach($corporateCards as $service)
+                <a href="{{ $service['link'] }}" class="group relative bg-white rounded-[2rem] overflow-hidden border border-slate-100 shadow-xl shadow-slate-200/40 hover:shadow-[#ED1C24]/10 transition-all duration-500 hover:-translate-y-3 block">
                     <!-- Image Shield -->
                     <div class="relative h-60 overflow-hidden">
                         <img src="{{ $service['img'] }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.2s]">
@@ -1420,6 +1412,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     <!-- Operational Logic (How It Works) -->
     @if(($hp['hp_how_show'] ?? '1') === '1')
@@ -1570,17 +1563,22 @@
             <div x-show="locationTab === 'pakistan'" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-20" x-transition:enter-end="opacity-100 translate-y-0"
                  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
                 @php
-                    $pakCities = [
-                        ['name' => 'Lahore Hub', 'search' => 'Lahore', 'img' => url('images/landmarks/lahore.png'), 'code' => 'LHE-01', 'is_local' => true],
-                        ['name' => 'Karachi District', 'search' => 'Karachi', 'img' => url('images/landmarks/karachi.png'), 'code' => 'KHI-02', 'is_local' => true],
-                        ['name' => 'Islamabad Node', 'search' => 'Islamabad', 'img' => url('images/landmarks/islamabad.png'), 'code' => 'ISB-03', 'is_local' => true],
-                        ['name' => 'Multan Core', 'search' => 'Multan', 'img' => url('images/landmarks/multan.png'), 'code' => 'MUX-04', 'is_local' => true],
-                        ['name' => 'Faisalabad Grid', 'search' => 'Faisalabad', 'img' => url('images/landmarks/faisalabad.png'), 'code' => 'LYP-05', 'is_local' => true],
+                    $allLandmarks = $media['landmark'] ?? collect();
+                    $pakLand = $allLandmarks->filter(fn($m) => ($m->meta['is_local'] ?? true));
+                    $pakCities = $pakLand->isNotEmpty() ? $pakLand->map(fn($m) => [
+                        'name' => $m->title, 'search' => $m->tag ?: $m->title, 'code' => $m->badge,
+                        'img_url' => $m->image ? asset('storage/' . $m->image) : url('images/landmarks/lahore.png'),
+                    ])->all() : [
+                        ['name' => 'Lahore Hub', 'search' => 'Lahore', 'img_url' => url('images/landmarks/lahore.png'), 'code' => 'LHE-01'],
+                        ['name' => 'Karachi District', 'search' => 'Karachi', 'img_url' => url('images/landmarks/karachi.png'), 'code' => 'KHI-02'],
+                        ['name' => 'Islamabad Node', 'search' => 'Islamabad', 'img_url' => url('images/landmarks/islamabad.png'), 'code' => 'ISB-03'],
+                        ['name' => 'Multan Core', 'search' => 'Multan', 'img_url' => url('images/landmarks/multan.png'), 'code' => 'MUX-04'],
+                        ['name' => 'Faisalabad Grid', 'search' => 'Faisalabad', 'img_url' => url('images/landmarks/faisalabad.png'), 'code' => 'LYP-05'],
                     ];
                 @endphp
                 @foreach($pakCities as $city)
                 <a href="{{ route('services', ['city' => $city['search'] ?? $city['name']]) }}" class="group relative h-[340px] rounded-[2rem] overflow-hidden border border-white/5 hover:border-[#ED1C24]/30 transition-all duration-700 block">
-                    <img src="{{ $city['is_local'] ? $city['img'] : 'https://images.unsplash.com/'. $city['img'] .'?auto=format&fit=crop&w=600&q=80' }}" 
+                    <img src="{{ $city['img_url'] }}"
                          class="w-full h-full object-cover transform scale-110 group-hover:scale-100 transition-transform duration-[2s]">
                     <div class="absolute inset-0 bg-gradient-to-t from-[#0A192F] via-[#0A192F]/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity"></div>
                     
@@ -1600,17 +1598,21 @@
             <div x-show="locationTab === 'global'" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 translate-y-20" x-transition:enter-end="opacity-100 translate-y-0"
                  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
                 @php
-                    $globalCities = [
-                        ['name' => 'Dubai Marina', 'search' => 'Dubai', 'img' => 'photo-1512453979798-5ea266f8880c', 'code' => 'DXB-INT'],
-                        ['name' => 'Istanbul Core', 'search' => 'Istanbul', 'img' => 'photo-1524231757912-21f4fe3a7200', 'code' => 'IST-INT'],
-                        ['name' => 'London Prime', 'search' => 'London', 'img' => 'photo-1513635269975-59663e0ac1ad', 'code' => 'LHR-INT'],
-                        ['name' => 'Kuala Lumpur', 'search' => 'Kuala Lumpur', 'img' => 'photo-1542314831-068cd1dbfeeb', 'code' => 'KUL-INT'],
-                        ['name' => 'Maldives Atoll', 'search' => 'Maldives', 'img' => 'photo-1514282401047-d79a71a590e8', 'code' => 'MLE-INT'],
+                    $globalLand = $allLandmarks->filter(fn($m) => !($m->meta['is_local'] ?? true));
+                    $globalCities = $globalLand->isNotEmpty() ? $globalLand->map(fn($m) => [
+                        'name' => $m->title, 'search' => $m->tag ?: $m->title, 'code' => $m->badge,
+                        'img_url' => $m->image ? asset('storage/' . $m->image) : 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=600&q=80',
+                    ])->all() : [
+                        ['name' => 'Dubai Marina', 'search' => 'Dubai', 'img_url' => 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=600&q=80', 'code' => 'DXB-INT'],
+                        ['name' => 'Istanbul Core', 'search' => 'Istanbul', 'img_url' => 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=600&q=80', 'code' => 'IST-INT'],
+                        ['name' => 'London Prime', 'search' => 'London', 'img_url' => 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=600&q=80', 'code' => 'LHR-INT'],
+                        ['name' => 'Kuala Lumpur', 'search' => 'Kuala Lumpur', 'img_url' => 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80', 'code' => 'KUL-INT'],
+                        ['name' => 'Maldives Atoll', 'search' => 'Maldives', 'img_url' => 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=600&q=80', 'code' => 'MLE-INT'],
                     ];
                 @endphp
                 @foreach($globalCities as $city)
                 <a href="{{ route('services', ['city' => $city['search'] ?? $city['name']]) }}" class="group relative h-[340px] rounded-[2rem] overflow-hidden border border-white/5 hover:border-[#ED1C24]/30 transition-all duration-700 block">
-                    <img src="https://images.unsplash.com/{{ $city['img'] }}?auto=format&fit=crop&w=600&q=80" 
+                    <img src="{{ $city['img_url'] }}"
                          class="w-full h-full object-cover transform scale-110 group-hover:scale-100 transition-transform duration-[2s]">
                     <div class="absolute inset-0 bg-gradient-to-t from-[#0A192F] via-[#0A192F]/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity"></div>
                     
@@ -1806,6 +1808,27 @@
     </div>
 
     <!-- Strategic Infrastructure (Tech Platform) -->
+    @if(($hp['hp_tech_show'] ?? '1') === '1')
+    @php
+        $tiles = $media['video_tile'] ?? collect();
+        $tileDefaults = [
+            ['icon' => 'fa-server', 'title' => 'Corporate Architecture', 'subtitle' => 'Unified command center for enterprise-scale logistics and multi-node asset tracking.', 'video' => asset('images/CORPORATE HUB.mp4'), 'poster' => 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop', 'link' => ''],
+            ['icon' => 'fa-brain', 'title' => 'AI Orchestrator', 'subtitle' => 'Real-time Budget Analytics', 'video' => asset('images/ai technology.mp4'), 'poster' => 'https://images.unsplash.com/photo-1620712943543-bcc4628c9bb5?q=80&w=600&auto=format&fit=crop', 'link' => route('budget-planner')],
+            ['icon' => 'fa-network-wired', 'title' => 'Global Sync', 'subtitle' => 'Cross-Node Asset Locking', 'video' => asset('images/GLOBAL.mp4'), 'poster' => 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop', 'link' => ''],
+        ];
+        $vt = [];
+        for ($i = 0; $i < 3; $i++) {
+            $m = $tiles->get($i);
+            $vt[$i] = $m ? [
+                'icon'     => $m->meta['icon'] ?? $tileDefaults[$i]['icon'],
+                'title'    => $m->title ?: $tileDefaults[$i]['title'],
+                'subtitle' => $m->subtitle ?: $tileDefaults[$i]['subtitle'],
+                'video'    => $m->video ? asset('storage/' . $m->video) : $tileDefaults[$i]['video'],
+                'poster'   => $m->poster ? asset('storage/' . $m->poster) : $tileDefaults[$i]['poster'],
+                'link'     => $m->link ?: $tileDefaults[$i]['link'],
+            ] : $tileDefaults[$i];
+        }
+    @endphp
     <div class="py-24 bg-[#0A192F] relative overflow-hidden">
         <!-- Neural Map Texture -->
         <div class="absolute inset-0 opacity-5" style="background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');"></div>
@@ -1813,62 +1836,63 @@
 
         <div class="max-w-[1400px] mx-auto px-6 md:px-12 relative z-10">
             <div class="text-center mb-12">
-                <div class="inline-flex items-center gap-3 bg-white/5 px-6 py-2 rounded-full border border-white/10 mb-6 font-black text-[9px] text-white/60 uppercase tracking-[0.4em]">Engineered for Excellence</div>
+                <div class="inline-flex items-center gap-3 bg-white/5 px-6 py-2 rounded-full border border-white/10 mb-6 font-black text-[9px] text-white/60 uppercase tracking-[0.4em]">{{ $hp['hp_tech_badge'] ?? 'Engineered for Excellence' }}</div>
                 <h2 class="text-3xl md:text-5xl font-black text-white mb-6 uppercase tracking-tighter leading-none">
-                    Mission <span class="text-[#ED1C24]">Critical</span> Tech
+                    {{ $hp['hp_tech_title'] ?? 'Mission' }} <span class="text-[#ED1C24]">{{ $hp['hp_tech_title_hl'] ?? 'Critical' }}</span> {{ $hp['hp_tech_title_end'] ?? 'Tech' }}
                 </h2>
                 <p class="text-base md:text-lg text-blue-100/40 font-medium max-w-3xl mx-auto uppercase tracking-widest leading-relaxed">
-                    "Proprietary algorithmic ecosystem for budget orchestration and asset synchronization."
+                    "{{ $hp['hp_tech_subtitle'] ?? 'Proprietary algorithmic ecosystem for budget orchestration and asset synchronization.' }}"
                 </p>
             </div>
 
             <!-- Strategic Bento Grid -->
             <div class="grid grid-cols-1 md:grid-cols-12 gap-4 auto-rows-[200px]">
                 <div class="md:col-span-8 row-span-2 group relative rounded-[2rem] overflow-hidden shadow-2xl bg-[#0A192F] border border-white/5">
-                    <video autoplay loop muted playsinline preload="auto" poster="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-all duration-1000 z-0">
-                        <source src="{{ asset('images/CORPORATE HUB.mp4') }}" type="video/mp4">
+                    <video autoplay loop muted playsinline preload="auto" poster="{{ $vt[0]['poster'] }}" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-all duration-1000 z-0">
+                        <source src="{{ $vt[0]['video'] }}" type="video/mp4">
                     </video>
                     <div class="absolute inset-0 bg-gradient-to-t from-[#0A192F] via-[#0A192F]/40 to-transparent z-10"></div>
-                    
+
                     <div class="absolute bottom-10 left-10 z-20">
                         <div class="w-16 h-16 bg-blue-600 rounded-[1.5rem] flex items-center justify-center mb-6 text-white shadow-2xl shadow-blue-600/30">
-                            <i class="fa-solid fa-server text-2xl"></i>
+                            <i class="fa-solid {{ $vt[0]['icon'] }} text-2xl"></i>
                         </div>
-                        <h3 class="text-3xl md:text-4xl font-black text-white mb-4 uppercase tracking-tighter">Corporate <br/>Architecture</h3>
-                        <p class="text-base text-blue-100/60 font-medium max-w-xl">"Unified command center for enterprise-scale logistics and multi-node asset tracking."</p>
+                        <h3 class="text-3xl md:text-4xl font-black text-white mb-4 uppercase tracking-tighter">{{ $vt[0]['title'] }}</h3>
+                        <p class="text-base text-blue-100/60 font-medium max-w-xl">"{{ $vt[0]['subtitle'] }}"</p>
                     </div>
                 </div>
 
-                <a href="{{ route('budget-planner') }}" class="md:col-span-4 group relative rounded-[2rem] overflow-hidden shadow-2xl bg-[#0A192F] border border-white/5">
-                    <video autoplay loop muted playsinline preload="auto" poster="https://images.unsplash.com/photo-1620712943543-bcc4628c9bb5?q=80&w=600&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-[6s] z-0">
-                        <source src="{{ asset('images/ai technology.mp4') }}" type="video/mp4">
+                <a href="{{ $vt[1]['link'] ?: route('budget-planner') }}" class="md:col-span-4 group relative rounded-[2rem] overflow-hidden shadow-2xl bg-[#0A192F] border border-white/5">
+                    <video autoplay loop muted playsinline preload="auto" poster="{{ $vt[1]['poster'] }}" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-[6s] z-0">
+                        <source src="{{ $vt[1]['video'] }}" type="video/mp4">
                     </video>
                     <div class="absolute inset-0 bg-gradient-to-br from-[#ED1C24]/30 via-transparent to-transparent z-10"></div>
                     <div class="absolute inset-0 p-8 flex flex-col justify-end z-20">
                         <div class="w-12 h-12 bg-[#ED1C24] rounded-xl flex items-center justify-center mb-4 text-white">
-                            <i class="fa-solid fa-brain text-lg"></i>
+                            <i class="fa-solid {{ $vt[1]['icon'] }} text-lg"></i>
                         </div>
-                        <h4 class="text-xl font-black text-white mb-1 uppercase tracking-tight">AI Orchestrator</h4>
-                        <p class="text-[10px] text-blue-100/50 font-bold uppercase tracking-widest">Real-time Budget Analytics</p>
+                        <h4 class="text-xl font-black text-white mb-1 uppercase tracking-tight">{{ $vt[1]['title'] }}</h4>
+                        <p class="text-[10px] text-blue-100/50 font-bold uppercase tracking-widest">{{ $vt[1]['subtitle'] }}</p>
                     </div>
                 </a>
 
                 <div class="md:col-span-4 group relative rounded-[2rem] overflow-hidden shadow-2xl bg-[#0A192F] border border-white/5">
-                    <video autoplay loop muted playsinline preload="auto" poster="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:rotate-1 group-hover:scale-110 transition-transform duration-[7s] z-0">
-                        <source src="{{ asset('images/GLOBAL.mp4') }}" type="video/mp4">
+                    <video autoplay loop muted playsinline preload="auto" poster="{{ $vt[2]['poster'] }}" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:rotate-1 group-hover:scale-110 transition-transform duration-[7s] z-0">
+                        <source src="{{ $vt[2]['video'] }}" type="video/mp4">
                     </video>
                     <div class="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-transparent z-10"></div>
                     <div class="absolute inset-0 p-8 flex flex-col justify-end z-20">
                         <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mb-4 text-white">
-                            <i class="fa-solid fa-network-wired text-lg"></i>
+                            <i class="fa-solid {{ $vt[2]['icon'] }} text-lg"></i>
                         </div>
-                        <h4 class="text-xl font-black text-white mb-1 uppercase tracking-tight">Global Sync</h4>
-                        <p class="text-[10px] text-blue-100/50 font-bold uppercase tracking-widest">Cross-Node Asset Locking</p>
+                        <h4 class="text-xl font-black text-white mb-1 uppercase tracking-tight">{{ $vt[2]['title'] }}</h4>
+                        <p class="text-[10px] text-blue-100/50 font-bold uppercase tracking-widest">{{ $vt[2]['subtitle'] }}</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    @endif
 
     <!-- Partner Intel (Testimonials) -->
     @if(($hp['hp_testi_show'] ?? '1') === '1' && count($testimonialSlides))

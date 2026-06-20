@@ -50,6 +50,24 @@ class HomepageController extends Controller
             'hp_testi_title'     => 'Success',
             'hp_testi_title_hl'  => 'Metrics',
             'hp_testi_subtitle'  => 'Verified feedback from Pakistan\'s most prominent event architectures and corporate summits.',
+
+            // Corporate Solutions section
+            'hp_corp_show'       => '1',
+            'hp_corp_badge'      => 'Enterprise Ecosystem',
+            'hp_corp_title'      => 'Strategic',
+            'hp_corp_title_hl'   => 'Corporate',
+            'hp_corp_title_end'  => 'Solutions',
+            'hp_corp_subtitle'   => 'Pre-Engineered Tactical Assets for Board-Level Events and Global Operations.',
+            'hp_avatar_label'    => 'Vetted Vendors',
+            'hp_avatar_extra'    => '+42',
+
+            // Tech / Video Bento section
+            'hp_tech_show'       => '1',
+            'hp_tech_badge'      => 'Engineered for Excellence',
+            'hp_tech_title'      => 'Mission',
+            'hp_tech_title_hl'   => 'Critical',
+            'hp_tech_title_end'  => 'Tech',
+            'hp_tech_subtitle'   => 'Proprietary algorithmic ecosystem for budget orchestration and asset synchronization.',
         ];
     }
 
@@ -77,10 +95,25 @@ class HomepageController extends Controller
         return $content;
     }
 
+    /**
+     * All homepage media grouped by section (admin view shows every item, active or not).
+     */
+    public static function mediaBySection(): array
+    {
+        $all = \App\Models\HomepageMedia::orderBy('sort_order')->orderBy('id')->get()->groupBy('section');
+        return [
+            'corporate_card' => $all->get('corporate_card', collect()),
+            'video_tile'     => $all->get('video_tile', collect()),
+            'landmark'       => $all->get('landmark', collect()),
+            'avatar'         => $all->get('avatar', collect()),
+        ];
+    }
+
     public function edit()
     {
         $hp = static::content();
-        return view('admin.homepage.edit', compact('hp'));
+        $media = static::mediaBySection();
+        return view('admin.homepage.edit', compact('hp', 'media'));
     }
 
     public function update(Request $request)

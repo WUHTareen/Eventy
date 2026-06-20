@@ -220,6 +220,9 @@ Route::delete('/services/{service}', [AdminController::class, 'deleteService'])-
     // Homepage Content (CMS)
     Route::get('/homepage', [\App\Http\Controllers\Admin\HomepageController::class, 'edit'])->name('homepage.edit');
     Route::post('/homepage', [\App\Http\Controllers\Admin\HomepageController::class, 'update'])->name('homepage.update');
+    Route::post('/homepage/media', [\App\Http\Controllers\Admin\HomepageMediaController::class, 'store'])->name('homepage.media.store');
+    Route::post('/homepage/media/{media}', [\App\Http\Controllers\Admin\HomepageMediaController::class, 'update'])->name('homepage.media.update');
+    Route::delete('/homepage/media/{media}', [\App\Http\Controllers\Admin\HomepageMediaController::class, 'destroy'])->name('homepage.media.destroy');
 
     // Blog Management
     Route::resource('blog', \App\Http\Controllers\Admin\BlogController::class);

@@ -217,6 +217,9 @@ class HomeController extends Controller
         // Homepage CMS content (hero, section headings, steps, CTA) with defaults.
         $hp = HomepageController::content();
 
+        // Admin-managed homepage media (corporate cards, video tiles, landmarks, avatars).
+        $media = \App\Models\HomepageMedia::where('is_active', true)->orderBy('sort_order')->orderBy('id')->get()->groupBy('section');
+
         if ($request->header('X-Partial') === 'stats') {
             return view('partials.home-stats', compact('stats'));
         }
@@ -225,7 +228,7 @@ class HomeController extends Controller
             return view('partials.home-marketplace', compact('pakistanServices', 'globalServices', 'isSearching'));
         }
 
-        return view('welcome', compact('pakistanServices', 'globalServices', 'stats', 'categories', 'featureCards', 'testimonialSlides', 'customPackages', 'cities', 'isSearching', 'hp'));
+        return view('welcome', compact('pakistanServices', 'globalServices', 'stats', 'categories', 'featureCards', 'testimonialSlides', 'customPackages', 'cities', 'isSearching', 'hp', 'media'));
     }
 
     public function searchSuggestions(Request $request)
