@@ -8,6 +8,9 @@
                 <p class="text-gray-500 text-sm mt-1">Manage all services on the platform</p>
             </div>
             <div class="flex items-center gap-2">
+                <a href="{{ route('admin.services.create') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-xl transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Add Service
+                </a>
                 <a href="{{ route('admin.services.trash') }}" class="bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold py-2.5 px-5 rounded-xl transition-all flex items-center gap-2">
                     <i class="fa-solid fa-trash-can"></i> Trash
                 </a>

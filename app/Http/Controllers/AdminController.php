@@ -142,6 +142,77 @@ class AdminController extends Controller
         return view('admin.services', compact('services'));
     }
 
+    /**
+     * Show the admin "create service" form (admin assigns the service to a vendor).
+     */
+    public function createService()
+    {
+        $vendors = User::where('role', 'vendor')->orderBy('name')->get();
+        $categories = ServiceCategory::all();
+        return view('admin.services.create', compact('vendors', 'categories'));
+    }
+
+    /**
+     * Store a service created by the admin on behalf of a selected vendor.
+     */
+    public function storeService(Request $request)
+    {
+        $validated = $request->validate([
+            'user_id'      => 'required|exists:users,id',
+            'name'         => 'required|string|max:255',
+            'description'  => 'required|string',
+            'price'        => 'required|numeric|min:0',
+            'price_type'   => 'nullable|string|max:50',
+            'category_id'  => 'nullable|exists:service_categories,id',
+            'location'     => 'nullable|string|max:255',
+            'images.*'     => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'featured_image_index' => 'nullable|integer|min:0',
+            'extra'        => 'nullable|array',
+            'packages'     => 'nullable|array',
+            'packages.*.name'  => 'required_with:packages|string|max:100',
+            'packages.*.price' => 'required_with:packages|numeric|min:0',
+            'packages.*.description' => 'nullable|string|max:500',
+            'add_ons'      => 'nullable|array',
+            'add_ons.*.name'  => 'required_with:add_ons|string|max:100',
+            'add_ons.*.price' => 'required_with:add_ons|numeric|min:0',
+        ]);
+
+        $imagePaths = [];
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $imagePaths[] = $image->store('services', 'public');
+            }
+        }
+
+        $service = Service::create([
+            'user_id'              => $validated['user_id'],
+            'name'                 => $validated['name'],
+            'description'          => $validated['description'],
+            'price'                => $validated['price'],
+            'price_type'           => $validated['price_type'] ?? 'fixed',
+            'category_id'          => $validated['category_id'] ?? null,
+            'location'             => $validated['location'] ?? null,
+            'extra_data'           => $request->input('extra', []),
+            'image'                => $imagePaths[0] ?? null,
+            'images'               => $imagePaths,
+            'featured_image_index' => $request->featured_image_index ?? 0,
+            'packages'             => $request->packages,
+            'add_ons'              => $request->add_ons,
+            'status'               => 'active',
+        ]);
+
+        // Notify the vendor that the admin published a service for them
+        Notification::createServiceNotification(
+            $service->user_id,
+            'Service Published by Admin',
+            'A new service "' . $service->name . '" has been added to your account by the admin.',
+            route('services.show', $service)
+        );
+
+        return redirect()->route('admin.services')->with('success', 'Service created successfully.');
+    }
+
+
     public function bookings()
     {
         $bookings = Booking::with(['user', 'service', 'vendor'])->latest()->paginate(20);
