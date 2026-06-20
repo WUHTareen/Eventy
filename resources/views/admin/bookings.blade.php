@@ -96,7 +96,22 @@
                                                 <span class="text-[10px] font-bold text-gray-400 uppercase">Unpaid</span>
                                             @endif
 
-                                            @if($booking->payment && $booking->payment->status === 'completed')
+                                            @if($booking->payment && $booking->payment->status === 'awaiting_verification')
+                                                <div class="mt-1 flex justify-center gap-1">
+                                                    <form action="{{ route('admin.payments.verify', $booking->payment) }}" method="POST" onsubmit="return confirm('Verify this payment as received?')">
+                                                        @csrf @method('PUT')
+                                                        <button type="submit" class="text-[9px] font-black uppercase tracking-tighter bg-emerald-50 hover:bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded border border-emerald-100">
+                                                            <i class="fa-solid fa-check"></i> Verify
+                                                        </button>
+                                                    </form>
+                                                    <form action="{{ route('admin.payments.reject', $booking->payment) }}" method="POST" onsubmit="return confirm('Reject this payment proof?')">
+                                                        @csrf @method('PUT')
+                                                        <button type="submit" class="text-[9px] font-black uppercase tracking-tighter bg-red-50 hover:bg-red-100 text-red-600 px-2 py-0.5 rounded border border-red-100">
+                                                            <i class="fa-solid fa-xmark"></i> Reject
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            @elseif($booking->payment && $booking->payment->status === 'completed')
                                                 <div class="mt-1 flex justify-center gap-1">
                                                     <form action="{{ route('admin.payments.unverify', $booking->payment) }}" method="POST" onsubmit="return confirm('Revert this payment back to awaiting verification?')">
                                                         @csrf @method('PUT')
@@ -111,6 +126,15 @@
                                                         </button>
                                                     </form>
                                                 </div>
+                                            @elseif($booking->payment && $booking->payment->status === 'failed')
+                                                <div class="mt-1 flex justify-center gap-1">
+                                                    <form action="{{ route('admin.payments.verify', $booking->payment) }}" method="POST" onsubmit="return confirm('Verify this payment as received?')">
+                                                        @csrf @method('PUT')
+                                                        <button type="submit" class="text-[9px] font-black uppercase tracking-tighter bg-emerald-50 hover:bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded border border-emerald-100">
+                                                            <i class="fa-solid fa-check"></i> Verify
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             @endif
                                         </div>
                                     </td>
@@ -122,12 +146,43 @@
                                             <a href="{{ route('bookings.invoice', $booking) }}" class="text-indigo-600 hover:text-indigo-900 font-bold flex items-center gap-1">
                                                 <i class="fa-solid fa-download"></i> Invoice
                                             </a>
+                                            @if($booking->status === 'pending')
+                                                <form action="{{ route('admin.bookings.status', $booking) }}" method="POST" onsubmit="return confirm('Accept this booking?')">
+                                                    @csrf @method('PUT')
+                                                    <input type="hidden" name="status" value="confirmed">
+                                                    <button type="submit" class="text-green-500 hover:text-green-700 transition" title="Accept">
+                                                        <i class="fa-solid fa-check"></i>
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('admin.bookings.status', $booking) }}" method="POST" onsubmit="return confirm('Reject this booking?')">
+                                                    @csrf @method('PUT')
+                                                    <input type="hidden" name="status" value="cancelled">
+                                                    <button type="submit" class="text-red-500 hover:text-red-700 transition" title="Reject">
+                                                        <i class="fa-solid fa-xmark"></i>
+                                                    </button>
+                                                </form>
+                                            @elseif($booking->status === 'confirmed')
+                                                <form action="{{ route('admin.bookings.status', $booking) }}" method="POST" onsubmit="return confirm('Mark this booking completed?')">
+                                                    @csrf @method('PUT')
+                                                    <input type="hidden" name="status" value="completed">
+                                                    <button type="submit" class="text-indigo-500 hover:text-indigo-700 transition" title="Mark Completed">
+                                                        <i class="fa-solid fa-flag-checkered"></i>
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('admin.bookings.status', $booking) }}" method="POST" onsubmit="return confirm('Cancel this booking?')">
+                                                    @csrf @method('PUT')
+                                                    <input type="hidden" name="status" value="cancelled">
+                                                    <button type="submit" class="text-red-500 hover:text-red-700 transition" title="Cancel">
+                                                        <i class="fa-solid fa-ban"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
                                             <div x-data="{ open: false }" class="relative">
-                                                <button @click="open = !open" class="text-gray-400 hover:text-indigo-600 transition" title="Change status">
+                                                <button @click="open = !open" class="text-gray-400 hover:text-indigo-600 transition" title="More status options">
                                                     <i class="fa-solid fa-pen-to-square"></i>
                                                 </button>
                                                 <div x-show="open" @click.away="open = false" x-cloak class="absolute right-0 mt-2 w-44 bg-white border border-gray-100 rounded-xl shadow-lg z-20 p-2 text-left">
-                                                    @foreach(['pending' => 'Mark Pending', 'confirmed' => 'Accept', 'completed' => 'Mark Completed', 'cancelled' => 'Reject / Cancel'] as $statusKey => $label)
+                                                    @foreach(['pending' => 'Mark Pending', 'confirmed' => 'Mark Confirmed', 'completed' => 'Mark Completed', 'cancelled' => 'Mark Cancelled'] as $statusKey => $label)
                                                         @if($booking->status !== $statusKey)
                                                             <form action="{{ route('admin.bookings.status', $booking) }}" method="POST" onsubmit="return confirm('Change booking status to {{ $label }}?')">
                                                                 @csrf @method('PUT')
