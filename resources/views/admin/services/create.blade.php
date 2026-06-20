@@ -106,16 +106,15 @@
 
                         <div>
                             <label class="block text-sm font-black text-gray-700 mb-4 ml-1">Suitable for Event Types</label>
-                            <p class="text-xs text-gray-400 font-medium mb-3 ml-1">Click a type to select it. Selected types are highlighted. Use the input below to add custom ones.</p>
+                            <p class="text-xs text-gray-400 font-medium mb-3 ml-1">Click a type to select it (highlighted = selected). Add custom ones using the input below.</p>
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <template x-for="(item, index) in eventTypes" :key="item.name">
                                     <div @click="toggleEventType(index)"
                                         class="cursor-pointer px-4 py-3 rounded-2xl flex items-center justify-center gap-2 text-sm font-bold transition-all select-none"
                                         :class="item.selected ? 'bg-purple-50 border border-purple-200 text-purple-600' : 'bg-gray-50 border border-gray-100 text-gray-400 hover:bg-gray-100'">
                                         <i class="fa-solid fa-check text-[10px]" x-show="item.selected"></i>
-                                        <input type="hidden" name="extra[event_types][]" :value="item.name" x-show="item.selected" :disabled="!item.selected">
+                                        <input type="hidden" name="extra[event_types][]" :value="item.name" :disabled="!item.selected">
                                         <span x-text="item.name"></span>
-                                        <button type="button" @click.stop="removeEventType(index)" class="text-current opacity-30 hover:opacity-100 hover:text-red-500"><i class="fa-solid fa-xmark text-xs"></i></button>
                                     </div>
                                 </template>
                             </div>
@@ -275,7 +274,7 @@
                 eventTypes: (function () {
                     const defaults = ['Wedding', 'Corporate', 'Birthday', 'Party', 'Travel', 'General'];
                     const selected = {!! json_encode(old('extra.event_types', [])) !!};
-                    const list = defaults.map(name => ({ name, selected: selected.length === 0 ? true : selected.includes(name) }));
+                    const list = defaults.map(name => ({ name, selected: selected.includes(name) }));
                     selected.forEach(name => {
                         if (!defaults.includes(name)) list.push({ name, selected: true });
                     });
