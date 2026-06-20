@@ -428,14 +428,17 @@ class BookingController extends Controller
             'cancelled' => 'fa-circle-xmark',
         ];
 
-        Notification::createBookingNotification(
-            $booking->user_id,
-            'Protocol Update: ' . ucfirst($request->status),
-            'The asset node [' . $booking->service->name . '] has updated your mission status to: ' . strtoupper($request->status) . '.',
-            route('bookings.index'),
-            $icons[$request->status],
-            $colors[$request->status]
-        );
+        // Notify the customer only if they have a registered account (guests have no user_id)
+        if ($booking->user_id) {
+            Notification::createBookingNotification(
+                $booking->user_id,
+                'Protocol Update: ' . ucfirst($request->status),
+                'The asset node [' . $booking->service->name . '] has updated your mission status to: ' . strtoupper($request->status) . '.',
+                route('bookings.index'),
+                $icons[$request->status],
+                $colors[$request->status]
+            );
+        }
 
         // Notify vendor about their own action (confirmation)
         Notification::createBookingNotification(
