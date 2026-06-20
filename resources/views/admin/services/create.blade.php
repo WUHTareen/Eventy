@@ -49,6 +49,9 @@
                                 <select id="user_id" name="user_id" required
                                     class="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-[1.5rem] focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 transition-all font-bold appearance-none">
                                     <option value="">Select Vendor</option>
+                                    <option value="{{ auth()->id() }}" {{ old('user_id') == auth()->id() ? 'selected' : '' }}>
+                                        Myself ({{ auth()->user()->name }}) — Admin Account
+                                    </option>
                                     @foreach($vendors as $vendor)
                                         <option value="{{ $vendor->id }}" {{ old('user_id') == $vendor->id ? 'selected' : '' }}>
                                             {{ $vendor->name }} ({{ $vendor->email }})
@@ -77,7 +80,7 @@
                             <div>
                                 <label for="category_id" class="block text-sm font-black text-gray-700 mb-3 ml-1">Category</label>
                                 <div class="relative">
-                                    <select id="category_id" name="category_id"
+                                    <select id="category_id" :name="categorySelection === '__new__' ? '' : 'category_id'" x-model="categorySelection"
                                         class="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-[1.5rem] focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 transition-all font-bold appearance-none">
                                         <option value="">Select Category</option>
                                         @foreach($categories as $category)
@@ -85,9 +88,13 @@
                                                 {{ $category->name }}
                                             </option>
                                         @endforeach
+                                        <option value="__new__">+ Add New Category…</option>
                                     </select>
                                     <i class="fa-solid fa-chevron-down absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-xs"></i>
                                 </div>
+                                <input type="text" x-show="categorySelection === '__new__'" x-cloak
+                                    name="new_category_name" value="{{ old('new_category_name') }}" placeholder="New category name"
+                                    class="w-full mt-3 px-6 py-4 bg-purple-50 border border-purple-100 rounded-[1.5rem] focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 transition-all font-bold">
                             </div>
                             <div>
                                 <label for="location" class="block text-sm font-black text-gray-700 mb-3 ml-1">Location</label>
@@ -100,14 +107,18 @@
                         <div>
                             <label class="block text-sm font-black text-gray-700 mb-4 ml-1">Suitable for Event Types</label>
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                @foreach(['Wedding', 'Corporate', 'Birthday', 'Party', 'Travel', 'General'] as $type)
-                                    <label class="cursor-pointer group">
-                                        <input type="checkbox" name="extra[event_types][]" value="{{ $type }}" class="peer sr-only">
-                                        <div class="px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-center text-sm font-bold text-gray-500 peer-checked:bg-purple-50 peer-checked:text-purple-600 peer-checked:border-purple-200 transition-all group-hover:bg-gray-100">
-                                            {{ $type }}
-                                        </div>
-                                    </label>
-                                @endforeach
+                                <template x-for="(type, index) in eventTypes" :key="type">
+                                    <div class="px-4 py-3 bg-purple-50 border border-purple-200 rounded-2xl flex items-center justify-center gap-2 text-sm font-bold text-purple-600">
+                                        <input type="hidden" name="extra[event_types][]" :value="type">
+                                        <span x-text="type"></span>
+                                        <button type="button" @click="removeEventType(index)" class="text-purple-300 hover:text-red-500"><i class="fa-solid fa-xmark text-xs"></i></button>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="flex items-center gap-3 mt-4">
+                                <input type="text" x-model="newEventType" @keydown.enter.prevent="addEventType()" placeholder="Add custom event type (e.g., Engagement)"
+                                    class="flex-1 px-5 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 transition-all font-bold text-sm">
+                                <button type="button" @click="addEventType()" class="bg-purple-600 text-white px-5 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-purple-700 transition-all">+ Add</button>
                             </div>
                         </div>
                     </div>
@@ -176,39 +187,60 @@
                     </div>
 
                     <!-- Images -->
-                    <div class="space-y-6">
+                    <div class="space-y-10">
                         <h4 class="text-lg font-black text-gray-900 tracking-tight">Service Images</h4>
-                        <div class="relative">
-                            <input type="file" id="image-upload" accept="image/*" multiple class="hidden" @change="handleFiles($event)">
-                            <label for="image-upload" class="block w-full rounded-[2rem] border-2 border-dashed border-gray-200 bg-gray-50/30 p-10 text-center transition-all hover:bg-white hover:border-indigo-400 cursor-pointer">
-                                <div class="w-16 h-16 bg-white rounded-2xl shadow-lg flex items-center justify-center mx-auto mb-4">
-                                    <i class="fa-solid fa-images text-indigo-500 text-xl"></i>
-                                </div>
-                                <h5 class="text-lg font-black text-gray-900 mb-1">Upload Gallery Images</h5>
-                                <p class="text-gray-400 font-medium text-sm">Select multiple images. Choose one as the featured (main card) image.</p>
-                            </label>
+
+                        <!-- Featured Image -->
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-star text-indigo-500"></i>
+                                <h5 class="text-sm font-black text-gray-800 uppercase tracking-widest">Featured Image <span class="text-gray-400 font-bold">(Main Card Image)</span></h5>
+                            </div>
+                            <div x-show="!featuredPreview" class="relative">
+                                <input type="file" id="featured-upload" name="featured_image" accept="image/*" class="hidden" @change="handleFeaturedFile($event)">
+                                <label for="featured-upload" class="block w-full rounded-[2rem] border-2 border-dashed border-indigo-200 bg-indigo-50/30 p-8 text-center transition-all hover:bg-white hover:border-indigo-400 cursor-pointer">
+                                    <div class="w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center mx-auto mb-3">
+                                        <i class="fa-solid fa-star text-indigo-500 text-lg"></i>
+                                    </div>
+                                    <h5 class="text-base font-black text-gray-900 mb-1">Upload Featured Image</h5>
+                                    <p class="text-gray-400 font-medium text-sm">This image is shown on the service card and listings.</p>
+                                </label>
+                            </div>
+                            <div x-show="featuredPreview" class="relative w-48 aspect-square rounded-[1.5rem] overflow-hidden border-2 border-indigo-500 shadow-xl">
+                                <img :src="featuredPreview" class="w-full h-full object-cover">
+                                <button type="button" @click="removeFeaturedFile()" class="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-lg flex items-center justify-center hover:bg-red-600"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                                <div class="absolute top-2 left-2 bg-indigo-500 text-white w-7 h-7 rounded-xl flex items-center justify-center shadow-lg"><i class="fa-solid fa-star text-xs"></i></div>
+                            </div>
                         </div>
 
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-6" x-show="previews.length > 0">
-                            <template x-for="(item, index) in previews" :key="index">
-                                <div class="relative group aspect-square rounded-[1.5rem] overflow-hidden border-2"
-                                     :class="featuredIndex === index ? 'border-indigo-500 shadow-xl' : 'border-gray-100'">
-                                    <img :src="item.url" class="w-full h-full object-cover">
-                                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3">
-                                        <div class="flex justify-end">
+                        <!-- Gallery Images -->
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-images text-rose-500"></i>
+                                <h5 class="text-sm font-black text-gray-800 uppercase tracking-widest">Gallery Images <span class="text-gray-400 font-bold">(Optional, additional photos)</span></h5>
+                            </div>
+                            <div class="relative">
+                                <input type="file" id="gallery-upload" accept="image/*" multiple class="hidden" @change="handleFiles($event)">
+                                <label for="gallery-upload" class="block w-full rounded-[2rem] border-2 border-dashed border-gray-200 bg-gray-50/30 p-8 text-center transition-all hover:bg-white hover:border-rose-400 cursor-pointer">
+                                    <div class="w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center mx-auto mb-3">
+                                        <i class="fa-solid fa-images text-rose-500 text-lg"></i>
+                                    </div>
+                                    <h5 class="text-base font-black text-gray-900 mb-1">Upload Gallery Images</h5>
+                                    <p class="text-gray-400 font-medium text-sm">Select multiple images to show in the service gallery.</p>
+                                </label>
+                            </div>
+
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-6" x-show="previews.length > 0">
+                                <template x-for="(item, index) in previews" :key="index">
+                                    <div class="relative group aspect-square rounded-[1.5rem] overflow-hidden border-2 border-gray-100">
+                                        <img :src="item.url" class="w-full h-full object-cover">
+                                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex justify-end p-3">
                                             <button type="button" @click="removeImage(index)" class="w-8 h-8 bg-red-500 text-white rounded-lg flex items-center justify-center hover:bg-red-600"><i class="fa-solid fa-trash-can text-xs"></i></button>
                                         </div>
-                                        <button type="button" @click="setFeatured(index)"
-                                                class="w-full py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
-                                                :class="featuredIndex === index ? 'bg-indigo-500 text-white' : 'bg-white text-gray-900 hover:bg-indigo-50'">
-                                            <span x-text="featuredIndex === index ? 'Featured' : 'Set Featured'"></span>
-                                        </button>
                                     </div>
-                                    <div x-show="featuredIndex === index" class="absolute top-3 left-3 bg-indigo-500 text-white w-7 h-7 rounded-xl flex items-center justify-center shadow-lg"><i class="fa-solid fa-star text-xs"></i></div>
-                                </div>
-                            </template>
+                                </template>
+                            </div>
                         </div>
-                        <input type="hidden" name="featured_image_index" :value="featuredIndex">
                     </div>
 
                     <!-- Action Bar -->
@@ -230,15 +262,41 @@
             return {
                 submitting: false,
                 previews: [],
-                featuredIndex: 0,
                 dataTransfer: new DataTransfer(),
+                featuredPreview: null,
+                featuredFile: null,
                 packages: [],
                 addons: [],
+                categorySelection: '{{ old('category_id') }}',
+                eventTypes: {!! json_encode(old('extra.event_types', ['Wedding', 'Corporate', 'Birthday', 'Party', 'Travel', 'General'])) !!},
+                newEventType: '',
 
                 addPackage() { this.packages.push({ name: '', price: '', description: '' }); },
                 removePackage(index) { this.packages.splice(index, 1); },
                 addAddOn() { this.addons.push({ name: '', price: '' }); },
                 removeAddOn(index) { this.addons.splice(index, 1); },
+
+                addEventType() {
+                    const type = this.newEventType.trim();
+                    if (type && !this.eventTypes.includes(type)) {
+                        this.eventTypes.push(type);
+                    }
+                    this.newEventType = '';
+                },
+                removeEventType(index) { this.eventTypes.splice(index, 1); },
+
+                handleFeaturedFile(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    this.featuredFile = file;
+                    this.featuredPreview = URL.createObjectURL(file);
+                },
+                removeFeaturedFile() {
+                    if (this.featuredPreview) URL.revokeObjectURL(this.featuredPreview);
+                    this.featuredPreview = null;
+                    this.featuredFile = null;
+                    document.getElementById('featured-upload').value = '';
+                },
 
                 handleFiles(event) {
                     const files = Array.from(event.target.files);
@@ -255,10 +313,7 @@
                     const newDT = new DataTransfer();
                     this.previews.forEach(p => newDT.items.add(p.file));
                     this.dataTransfer = newDT;
-                    if (this.featuredIndex === index) this.featuredIndex = 0;
-                    else if (this.featuredIndex > index) this.featuredIndex--;
                 },
-                setFeatured(index) { this.featuredIndex = index; },
 
                 handleSubmit(event) {
                     this.submitting = true;

@@ -14,6 +14,8 @@ use App\Models\Withdrawal;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 
 class AdminController extends Controller
@@ -153,7 +155,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Store a service created by the admin on behalf of a selected vendor.
+     * Store a service created by the admin on behalf of a selected vendor (or the admin themselves).
      */
     public function storeService(Request $request)
     {
@@ -164,6 +166,7 @@ class AdminController extends Controller
             'price'        => 'required|numeric|min:0',
             'price_type'   => 'nullable|string|max:50',
             'category_id'  => 'nullable|exists:service_categories,id',
+            'new_category_name' => 'nullable|string|max:100',
             'location'     => 'nullable|string|max:255',
             'images.*'     => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'featured_image_index' => 'nullable|integer|min:0',
@@ -177,12 +180,29 @@ class AdminController extends Controller
             'add_ons.*.price' => 'required_with:add_ons|numeric|min:0',
         ]);
 
-        $imagePaths = [];
+        $categoryId = $validated['category_id'] ?? null;
+        if (!empty($validated['new_category_name'])) {
+            $category = ServiceCategory::create([
+                'name'      => $validated['new_category_name'],
+                'slug'      => Str::slug($validated['new_category_name']),
+                'is_active' => true,
+            ]);
+            $categoryId = $category->id;
+        }
+
+        $featuredPath = null;
+        if ($request->hasFile('featured_image')) {
+            $featuredPath = $request->file('featured_image')->store('services', 'public');
+        }
+
+        $galleryPaths = [];
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                $imagePaths[] = $image->store('services', 'public');
+                $galleryPaths[] = $image->store('services', 'public');
             }
         }
+
+        $imagePaths = $featuredPath ? array_merge([$featuredPath], $galleryPaths) : $galleryPaths;
 
         $service = Service::create([
             'user_id'              => $validated['user_id'],
@@ -190,24 +210,26 @@ class AdminController extends Controller
             'description'          => $validated['description'],
             'price'                => $validated['price'],
             'price_type'           => $validated['price_type'] ?? 'fixed',
-            'category_id'          => $validated['category_id'] ?? null,
+            'category_id'          => $categoryId,
             'location'             => $validated['location'] ?? null,
             'extra_data'           => $request->input('extra', []),
             'image'                => $imagePaths[0] ?? null,
             'images'               => $imagePaths,
-            'featured_image_index' => $request->featured_image_index ?? 0,
+            'featured_image_index' => 0,
             'packages'             => $request->packages,
             'add_ons'              => $request->add_ons,
             'status'               => 'active',
         ]);
 
-        // Notify the vendor that the admin published a service for them
-        Notification::createServiceNotification(
-            $service->user_id,
-            'Service Published by Admin',
-            'A new service "' . $service->name . '" has been added to your account by the admin.',
-            route('services.show', $service)
-        );
+        // Notify the vendor that the admin published a service for them (skip if admin made it for themselves)
+        if ($service->user_id !== Auth::id()) {
+            Notification::createServiceNotification(
+                $service->user_id,
+                'Service Published by Admin',
+                'A new service "' . $service->name . '" has been added to your account by the admin.',
+                route('services.show', $service)
+            );
+        }
 
         return redirect()->route('admin.services')->with('success', 'Service created successfully.');
     }
