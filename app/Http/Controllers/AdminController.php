@@ -78,85 +78,175 @@ class AdminController extends Controller
 
     public function analytics(Request $request)
     {
-        // Build the last 12 month buckets (oldest -> newest), DB-agnostic.
-        $months = collect();
-        for ($i = 11; $i >= 0; $i--) {
-            $m = now()->subMonths($i)->startOfMonth();
-            $months->put($m->format('Y-m'), [
-                'label'    => $m->format('M Y'),
-                'revenue'  => 0.0,
-                'bookings' => 0,
-                'users'    => 0,
-            ]);
+        // ---- Resolve the selected date range -------------------------------
+        $range = $request->input('range', '12m');
+        $now   = now();
+
+        switch ($range) {
+            case '7d':  $start = $now->copy()->subDays(6)->startOfDay();   $end = $now->copy()->endOfDay(); break;
+            case '30d': $start = $now->copy()->subDays(29)->startOfDay();  $end = $now->copy()->endOfDay(); break;
+            case '90d': $start = $now->copy()->subDays(89)->startOfDay();  $end = $now->copy()->endOfDay(); break;
+            case 'ytd': $start = $now->copy()->startOfYear();              $end = $now->copy()->endOfDay(); break;
+            case 'custom':
+                $start = $request->filled('from') ? \Carbon\Carbon::parse($request->input('from'))->startOfDay() : $now->copy()->subDays(29)->startOfDay();
+                $end   = $request->filled('to')   ? \Carbon\Carbon::parse($request->input('to'))->endOfDay()    : $now->copy()->endOfDay();
+                if ($end->lt($start)) { [$start, $end] = [$end->copy()->startOfDay(), $start->copy()->endOfDay()]; }
+                break;
+            case '12m':
+            default:
+                $range = '12m';
+                $start = $now->copy()->subMonths(11)->startOfMonth();
+                $end   = $now->copy()->endOfDay();
+                break;
         }
-        $since = now()->subMonths(11)->startOfMonth();
 
-        // Bookings (last 12 months) — revenue counts completed only, booking count counts all.
-        Booking::where('created_at', '>=', $since)
+        // Daily buckets for short spans, monthly for long ones.
+        $spanDays    = $start->diffInDays($end) + 1;
+        $granularity = $spanDays <= 92 ? 'day' : 'month';
+
+        // Previous period of equal length, immediately before the current one.
+        $prevEnd   = $start->copy()->subSecond();
+        $prevStart = $prevEnd->copy()->subDays($spanDays - 1)->startOfDay();
+
+        // ---- Build empty buckets (oldest -> newest) ------------------------
+        $buckets = collect();
+        $cursor  = $start->copy();
+        while ($cursor->lte($end)) {
+            if ($granularity === 'day') {
+                $key = $cursor->format('Y-m-d'); $label = $cursor->format('M j');
+                $cursor->addDay();
+            } else {
+                $cursor = $cursor->startOfMonth();
+                $key = $cursor->format('Y-m');   $label = $cursor->format('M Y');
+                $cursor->addMonth();
+            }
+            $buckets->put($key, ['label' => $label, 'revenue' => 0.0, 'bookings' => 0, 'users' => 0]);
+        }
+        $bucketKey = fn ($date) => $granularity === 'day' ? $date->format('Y-m-d') : $date->format('Y-m');
+
+        // ---- Fill buckets from bookings + users in range -------------------
+        Booking::whereBetween('created_at', [$start, $end])
             ->get(['created_at', 'status', 'total_price'])
-            ->each(function ($b) use ($months) {
-                $key = $b->created_at->format('Y-m');
-                if (!$months->has($key)) return;
-                $bucket = $months->get($key);
+            ->each(function ($b) use ($buckets, $bucketKey) {
+                $key = $bucketKey($b->created_at);
+                if (!$buckets->has($key)) return;
+                $bucket = $buckets->get($key);
                 $bucket['bookings']++;
-                if ($b->status === 'completed') {
-                    $bucket['revenue'] += (float) $b->total_price;
-                }
-                $months->put($key, $bucket);
+                if ($b->status === 'completed') $bucket['revenue'] += (float) $b->total_price;
+                $buckets->put($key, $bucket);
             });
 
-        // New users (last 12 months).
-        User::where('created_at', '>=', $since)
+        User::whereBetween('created_at', [$start, $end])
             ->get(['created_at'])
-            ->each(function ($u) use ($months) {
-                $key = $u->created_at->format('Y-m');
-                if (!$months->has($key)) return;
-                $bucket = $months->get($key);
+            ->each(function ($u) use ($buckets, $bucketKey) {
+                $key = $bucketKey($u->created_at);
+                if (!$buckets->has($key)) return;
+                $bucket = $buckets->get($key);
                 $bucket['users']++;
-                $months->put($key, $bucket);
+                $buckets->put($key, $bucket);
             });
 
-        $monthLabels    = $months->pluck('label')->values();
-        $revenueSeries  = $months->pluck('revenue')->values();
-        $bookingsSeries = $months->pluck('bookings')->values();
-        $usersSeries    = $months->pluck('users')->values();
+        $monthLabels    = $buckets->pluck('label')->values();
+        $revenueSeries  = $buckets->pluck('revenue')->values();
+        $bookingsSeries = $buckets->pluck('bookings')->values();
+        $usersSeries    = $buckets->pluck('users')->values();
 
-        // Bookings by status (doughnut).
-        $statusCounts = Booking::selectRaw('status, COUNT(*) as c')
-            ->groupBy('status')->pluck('c', 'status');
-        $statusOrder = ['pending', 'confirmed', 'completed', 'cancelled'];
+        // ---- Range-scoped totals (current vs previous for growth %) --------
+        $curRevenue  = (float) Booking::where('status', 'completed')->whereBetween('created_at', [$start, $end])->sum('total_price');
+        $curComm     = (float) Booking::where('status', 'completed')->whereBetween('created_at', [$start, $end])->sum('commission_fee');
+        $curBookings = Booking::whereBetween('created_at', [$start, $end])->count();
+        $curCompleted= Booking::where('status', 'completed')->whereBetween('created_at', [$start, $end])->count();
+        $curCancelled= Booking::where('status', 'cancelled')->whereBetween('created_at', [$start, $end])->count();
+        $curUsers    = User::where('role', 'user')->whereBetween('created_at', [$start, $end])->count();
+
+        $prevRevenue  = (float) Booking::where('status', 'completed')->whereBetween('created_at', [$prevStart, $prevEnd])->sum('total_price');
+        $prevBookings = Booking::whereBetween('created_at', [$prevStart, $prevEnd])->count();
+        $prevUsers    = User::where('role', 'user')->whereBetween('created_at', [$prevStart, $prevEnd])->count();
+
+        $growth = fn ($cur, $prev) => $prev > 0 ? round(($cur - $prev) / $prev * 100, 1) : ($cur > 0 ? 100.0 : 0.0);
+
+        // ---- Doughnut: booking status (in range) ---------------------------
+        $statusCounts = Booking::whereBetween('created_at', [$start, $end])
+            ->selectRaw('status, COUNT(*) as c')->groupBy('status')->pluck('c', 'status');
+        $statusOrder  = ['pending', 'confirmed', 'completed', 'cancelled'];
         $statusLabels = collect($statusOrder)->merge($statusCounts->keys())->unique()->values();
-        $statusData = $statusLabels->map(fn ($s) => (int) ($statusCounts[$s] ?? 0));
+        $statusData   = $statusLabels->map(fn ($s) => (int) ($statusCounts[$s] ?? 0));
 
-        // Top 6 service categories by booking count.
-        $topCategories = Booking::join('services', 'bookings.service_id', '=', 'services.id')
+        // ---- Top categories (in range) -------------------------------------
+        $topCategories = Booking::whereBetween('bookings.created_at', [$start, $end])
+            ->join('services', 'bookings.service_id', '=', 'services.id')
             ->leftJoin('service_categories', 'services.category_id', '=', 'service_categories.id')
             ->selectRaw("COALESCE(service_categories.name, 'Uncategorized') as name, COUNT(*) as c")
             ->groupBy('name')->orderByDesc('c')->limit(6)->pluck('c', 'name');
 
-        // Top 6 vendors by completed revenue.
+        // ---- Top services (in range) ---------------------------------------
+        $topServices = Booking::whereBetween('bookings.created_at', [$start, $end])
+            ->join('services', 'bookings.service_id', '=', 'services.id')
+            ->selectRaw('services.name as name, COUNT(*) as c')
+            ->groupBy('services.name')->orderByDesc('c')->limit(6)->pluck('c', 'name');
+
+        // ---- Top vendors by completed revenue (in range) -------------------
         $topVendors = Booking::where('bookings.status', 'completed')
+            ->whereBetween('bookings.created_at', [$start, $end])
             ->join('users', 'bookings.vendor_id', '=', 'users.id')
             ->selectRaw('users.name as name, SUM(bookings.total_price) as total')
             ->groupBy('users.name')->orderByDesc('total')->limit(6)->pluck('total', 'name');
 
-        // KPI headline numbers.
+        // ---- City-wise revenue (in range) — service.location maps to city --
+        $topCities = Booking::where('bookings.status', 'completed')
+            ->whereBetween('bookings.created_at', [$start, $end])
+            ->join('services', 'bookings.service_id', '=', 'services.id')
+            ->whereNotNull('services.location')->where('services.location', '!=', '')
+            ->selectRaw('services.location as name, SUM(bookings.total_price) as total, COUNT(*) as c')
+            ->groupBy('services.location')->orderByDesc('total')->limit(6)->get();
+
+        // ---- Cash-flow: withdrawals / payouts ------------------------------
+        $pendingPayouts      = (float) Withdrawal::whereIn('status', ['pending', 'approved'])->sum('amount');
+        $pendingPayoutsCount = Withdrawal::whereIn('status', ['pending', 'approved'])->count();
+        $paidPayouts         = (float) Withdrawal::where('status', 'paid')->sum('amount');
+
+        // ---- Vendor verification funnel ------------------------------------
+        $vendorsTotal    = User::where('role', 'vendor')->count();
+        $vendorsVerified = User::where('role', 'vendor')->where('is_verified', true)->count();
+        $vendorsPending  = $vendorsTotal - $vendorsVerified;
+
+        // ---- KPI cards -----------------------------------------------------
+        $cancelRate = $curBookings > 0 ? round($curCancelled / $curBookings * 100, 1) : 0.0;
         $kpis = [
-            'revenue'    => (float) Booking::where('status', 'completed')->sum('total_price'),
-            'commission' => (float) Booking::where('status', 'completed')->sum('commission_fee'),
-            'bookings'   => Booking::count(),
-            'completed'  => Booking::where('status', 'completed')->count(),
-            'users'      => User::where('role', 'user')->count(),
-            'vendors'    => User::where('role', 'vendor')->count(),
-            'services'   => Service::count(),
-            'aov'        => 0.0,
+            'revenue'    => $curRevenue,
+            'commission' => $curComm,
+            'aov'        => $curCompleted > 0 ? $curRevenue / $curCompleted : 0.0,
+            'bookings'   => $curBookings,
+            'completed'  => $curCompleted,
+            'users'      => $curUsers,
+            'cancel_rate'=> $cancelRate,
+            'pending_payouts' => $pendingPayouts,
+            // growth %
+            'g_revenue'  => $growth($curRevenue, $prevRevenue),
+            'g_bookings' => $growth($curBookings, $prevBookings),
+            'g_users'    => $growth($curUsers, $prevUsers),
         ];
-        $completedCount = $kpis['completed'] ?: 1;
-        $kpis['aov'] = $kpis['revenue'] / $completedCount;
+
+        $funnel = [
+            'vendors_total'    => $vendorsTotal,
+            'vendors_verified' => $vendorsVerified,
+            'vendors_pending'  => $vendorsPending,
+            'pending_payouts'  => $pendingPayouts,
+            'pending_payouts_count' => $pendingPayoutsCount,
+            'paid_payouts'     => $paidPayouts,
+        ];
+
+        $rangeMeta = [
+            'range' => $range,
+            'from'  => $start->format('Y-m-d'),
+            'to'    => $end->format('Y-m-d'),
+            'label' => $start->format('M j, Y') . ' – ' . $end->format('M j, Y'),
+        ];
 
         return view('admin.analytics', compact(
             'monthLabels', 'revenueSeries', 'bookingsSeries', 'usersSeries',
-            'statusLabels', 'statusData', 'topCategories', 'topVendors', 'kpis'
+            'statusLabels', 'statusData', 'topCategories', 'topServices',
+            'topVendors', 'topCities', 'kpis', 'funnel', 'rangeMeta'
         ));
     }
 
