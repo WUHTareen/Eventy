@@ -69,10 +69,6 @@
                             <i class="fa-solid fa-store mr-2 text-green-600"></i> {{ __('Vendors') }}
                         </x-nav-link>
 
-                        <x-nav-link :href="route('admin.withdrawals')" :active="request()->routeIs('admin.withdrawals')">
-                            <i class="fa-solid fa-money-bill-transfer mr-2 text-amber-600"></i> {{ __('Withdrawals') }}
-                        </x-nav-link>
-
                         <div class="hidden sm:flex sm:items-center">
                             <x-dropdown align="top" width="48">
                                 <x-slot name="trigger">
@@ -86,23 +82,26 @@
                                     </button>
                                 </x-slot>
                                 <x-slot name="content">
+                                    <x-dropdown-link :href="route('admin.withdrawals')">
+                                        <i class="fa-solid fa-money-bill-transfer mr-3 w-4 text-center text-amber-600"></i> {{ __('Withdrawals') }}
+                                    </x-dropdown-link>
                                     <x-dropdown-link :href="route('admin.vendor-logs')">
-                                        <i class="fa-solid fa-file-contract mr-2 text-gray-400"></i> {{ __('Vendor Logs') }}
+                                        <i class="fa-solid fa-file-contract mr-3 w-4 text-center text-indigo-600"></i> {{ __('Vendor Logs') }}
                                     </x-dropdown-link>
                                     <x-dropdown-link :href="route('admin.homepage.edit')">
-                                        <i class="fa-solid fa-house-laptop mr-2 text-gray-400"></i> {{ __('Homepage Content') }}
+                                        <i class="fa-solid fa-house-laptop mr-3 w-4 text-center text-sky-600"></i> {{ __('Homepage Content') }}
                                     </x-dropdown-link>
                                     <x-dropdown-link :href="route('admin.cities.index')">
-                                        <i class="fa-solid fa-city mr-2 text-gray-400"></i> {{ __('Cities') }}
+                                        <i class="fa-solid fa-city mr-3 w-4 text-center text-teal-600"></i> {{ __('Cities') }}
                                     </x-dropdown-link>
                                     <x-dropdown-link :href="route('admin.service-categories.index')">
-                                        <i class="fa-solid fa-list-check mr-2 text-gray-400"></i> {{ __('Service Categories') }}
+                                        <i class="fa-solid fa-list-check mr-3 w-4 text-center text-green-600"></i> {{ __('Service Categories') }}
                                     </x-dropdown-link>
                                     <x-dropdown-link :href="route('admin.testimonials.index')">
-                                        <i class="fa-solid fa-comment-dots mr-2 text-gray-400"></i> {{ __('Testimonials') }}
+                                        <i class="fa-solid fa-comment-dots mr-3 w-4 text-center text-purple-600"></i> {{ __('Testimonials') }}
                                     </x-dropdown-link>
                                     <x-dropdown-link :href="route('admin.features.index')">
-                                        <i class="fa-solid fa-star mr-2 text-gray-400"></i> {{ __('Feature Cards') }}
+                                        <i class="fa-solid fa-star mr-3 w-4 text-center text-yellow-500"></i> {{ __('Feature Cards') }}
                                     </x-dropdown-link>
                                 </x-slot>
                             </x-dropdown>
