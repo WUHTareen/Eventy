@@ -1,2 +1,19 @@
 User-agent: *
-Disallow:
+Allow: /
+
+# Private / account areas — keep these out of search results
+Disallow: /admin/
+Disallow: /vendor/
+Disallow: /hotel/vendor/
+Disallow: /login
+Disallow: /register
+Disallow: /password/
+Disallow: /profile
+Disallow: /dashboard
+Disallow: /my-bookings
+Disallow: /my-packages
+Disallow: /notifications
+Disallow: /wishlist
+Disallow: /bookings/
+
+Sitemap: https://eventy.pk/sitemap.xml

@@ -44,6 +44,11 @@
             [x-cloak] { display: none !important; }
         </style>
         @stack('styles')
+
+        {{-- Admin-managed header tracking / verification code (GSC, Analytics, Clarity, Meta Pixel, etc.) --}}
+        @if($headerTrackingCode = \App\Models\SiteSetting::get('header_tracking_code'))
+            {!! $headerTrackingCode !!}
+        @endif
     </head>
     <body class="font-sans antialiased bg-gray-50">
         @include('partials.toast')

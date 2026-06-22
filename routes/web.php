@@ -39,6 +39,7 @@ Route::get('/home', [HomeController::class, 'index']); // Keep /home as legacy i
 Route::get('/vendors/{vendor:id}', [\App\Http\Controllers\PublicVendorController::class, 'show'])->name('vendors.show');
 
 // Public Pages
+Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
 Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/services', [PageController::class, 'services'])->name('services');
 Route::get('/desks/{slug}', [PageController::class, 'desk'])->name('desk.show');

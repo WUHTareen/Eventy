@@ -102,6 +102,11 @@
         .toast-animate { animation: toast-in 0.4s ease-out; }
     </style>
     @stack('styles')
+
+    {{-- Admin-managed header tracking / verification code (GSC, Analytics, Clarity, Meta Pixel, etc.) --}}
+    @if($headerTrackingCode = \App\Models\SiteSetting::get('header_tracking_code'))
+        {!! $headerTrackingCode !!}
+    @endif
 </head>
 <body class="text-gray-800 antialiased flex flex-col min-h-screen overflow-x-hidden">
     @include('partials.toast')

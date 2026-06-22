@@ -62,6 +62,25 @@
                     </div>
                 </div>
 
+                {{-- HEADER TRACKING / VERIFICATION CODE --}}
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="font-bold text-lg text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-code text-[#0A3A7A]"></i> Header Tracking Code
+                    </h3>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-1">Header Code (GSC / Analytics / Clarity / Meta Pixel)</label>
+                        <p class="text-xs text-gray-400 mb-2">
+                            Paste any verification or tracking snippets here (e.g. Google Search Console meta tag,
+                            Google Analytics, Microsoft Clarity, Meta Pixel). This code is injected into the
+                            <code>&lt;head&gt;</code> of every public page exactly as entered.
+                        </p>
+                        <textarea name="header_tracking_code" rows="8"
+                                  spellcheck="false"
+                                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 font-mono text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                  placeholder="&lt;!-- Paste your tracking / verification code here --&gt;">{{ $settings['header_tracking_code'] ?? '' }}</textarea>
+                    </div>
+                </div>
+
                 {{-- LOGO & FAVICON --}}
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                     <h3 class="font-bold text-lg text-gray-800 mb-4 flex items-center gap-2">

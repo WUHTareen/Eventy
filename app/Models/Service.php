@@ -6,12 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Service extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['category_id', 'user_id', 'name', 'description', 'price', 'price_type', 'location', 'extra_data', 'image', 'images', 'featured_image_index', 'status', 'is_featured', 'cached_rating', 'reviews_count', 'packages', 'add_ons'];
+    protected $fillable = ['category_id', 'user_id', 'name', 'slug', 'description', 'price', 'price_type', 'location', 'extra_data', 'image', 'images', 'featured_image_index', 'status', 'is_featured', 'cached_rating', 'reviews_count', 'packages', 'add_ons'];
 
     protected $casts = [
         'extra_data' => 'array',
@@ -19,6 +20,60 @@ class Service extends Model
         'packages' => 'array',
         'add_ons' => 'array',
     ];
+
+    protected static function booted(): void
+    {
+        // Auto-generate a unique slug from the name whenever it is missing
+        // or the name changes (and the slug was not explicitly set).
+        static::saving(function (Service $service) {
+            if (empty($service->slug) || $service->isDirty('name') && ! $service->isDirty('slug')) {
+                $service->slug = $service->generateUniqueSlug($service->name);
+            }
+        });
+    }
+
+    /**
+     * Build a URL-safe slug from the given title that is unique across services.
+     */
+    public function generateUniqueSlug(?string $title): string
+    {
+        $base = Str::slug($title) ?: 'service';
+        $slug = $base;
+        $i = 2;
+
+        while (static::withTrashed()
+            ->where('slug', $slug)
+            ->where('id', '!=', $this->id)
+            ->exists()) {
+            $slug = $base . '-' . $i;
+            $i++;
+        }
+
+        return $slug;
+    }
+
+    /**
+     * Use the slug for route-model binding so service URLs read as
+     * /services/post-name instead of /services/9.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
+    /**
+     * Resolve bindings by slug, but still accept a numeric id so legacy
+     * /services/9 links and id-based JS calls keep working.
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        if (is_numeric($value)) {
+            return $this->where('id', $value)->first()
+                ?? $this->where('slug', $value)->first();
+        }
+
+        return $this->where('slug', $value)->first();
+    }
 
     public function getFeaturedImage()
     {

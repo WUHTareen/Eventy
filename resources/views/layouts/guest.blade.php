@@ -167,6 +167,11 @@
             .left-panel { border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
         }
     </style>
+
+    {{-- Admin-managed header tracking / verification code (GSC, Analytics, Clarity, Meta Pixel, etc.) --}}
+    @if($headerTrackingCode = \App\Models\SiteSetting::get('header_tracking_code'))
+        {!! $headerTrackingCode !!}
+    @endif
 </head>
 <body class="antialiased">
     <div class="master-container">
