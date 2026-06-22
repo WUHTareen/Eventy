@@ -85,6 +85,9 @@
                                     <x-dropdown-link :href="route('admin.withdrawals')">
                                         <i class="fa-solid fa-money-bill-transfer mr-3 w-4 text-center text-amber-600"></i> {{ __('Withdrawals') }}
                                     </x-dropdown-link>
+                                    <x-dropdown-link :href="route('admin.coupons.index')">
+                                        <i class="fa-solid fa-ticket mr-3 w-4 text-center text-rose-600"></i> {{ __('Coupons') }}
+                                    </x-dropdown-link>
                                     <x-dropdown-link :href="route('admin.vendor-logs')">
                                         <i class="fa-solid fa-file-contract mr-3 w-4 text-center text-indigo-600"></i> {{ __('Vendor Logs') }}
                                     </x-dropdown-link>

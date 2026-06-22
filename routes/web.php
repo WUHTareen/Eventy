@@ -215,6 +215,10 @@ Route::delete('/services/{service}', [AdminController::class, 'deleteService'])-
     Route::resource('testimonials', \App\Http\Controllers\Admin\TestimonialController::class);
     Route::resource('features', \App\Http\Controllers\Admin\FeatureController::class);
     Route::resource('cities', \App\Http\Controllers\Admin\CityController::class);
+    Route::get('/coupons', [\App\Http\Controllers\Admin\CouponController::class, 'index'])->name('coupons.index');
+    Route::post('/coupons', [\App\Http\Controllers\Admin\CouponController::class, 'store'])->name('coupons.store');
+    Route::put('/coupons/{coupon}', [\App\Http\Controllers\Admin\CouponController::class, 'update'])->name('coupons.update');
+    Route::delete('/coupons/{coupon}', [\App\Http\Controllers\Admin\CouponController::class, 'destroy'])->name('coupons.destroy');
     Route::get('/settings', [\App\Http\Controllers\Admin\SiteSettingController::class, 'index'])->name('settings.index');
     Route::put('/settings', [\App\Http\Controllers\Admin\SiteSettingController::class, 'update'])->name('settings.update');
 
