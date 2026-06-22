@@ -96,6 +96,14 @@
                                                 <span class="text-[10px] font-bold text-gray-400 uppercase">Unpaid</span>
                                             @endif
 
+                                            @if($booking->payment && $booking->payment->payment_proof)
+                                                <div class="mt-1 flex justify-center">
+                                                    <a href="{{ asset('storage/' . $booking->payment->payment_proof) }}" target="_blank" class="text-[9px] font-black uppercase tracking-tighter text-indigo-600 hover:text-indigo-800">
+                                                        <i class="fa-solid fa-image"></i> View Proof
+                                                    </a>
+                                                </div>
+                                            @endif
+
                                             @if($booking->payment && $booking->payment->status === 'awaiting_verification')
                                                 <div class="mt-1 flex justify-center gap-1">
                                                     <form action="{{ route('admin.payments.verify', $booking->payment) }}" method="POST" onsubmit="return confirm('Verify this payment as received?')">
@@ -146,6 +154,27 @@
                                             <a href="{{ route('bookings.invoice', $booking) }}" class="text-indigo-600 hover:text-indigo-900 font-bold flex items-center gap-1">
                                                 <i class="fa-solid fa-download"></i> Invoice
                                             </a>
+                                            @if(!$booking->user_id && $booking->tracking_token)
+                                                <div x-data="{ open: false }" class="relative">
+                                                    <button type="button" @click="open = !open" class="text-purple-600 hover:text-purple-800 transition" title="Guest tracking link">
+                                                        <i class="fa-solid fa-link"></i>
+                                                    </button>
+                                                    <div x-show="open" @click.away="open = false" x-cloak class="absolute right-0 z-20 mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-100 p-3 text-left">
+                                                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Tracking Link</p>
+                                                        @php $trackUrl = route('bookings.track', ['booking' => $booking->id, 'token' => $booking->tracking_token]); @endphp
+                                                        <input type="text" readonly value="{{ $trackUrl }}" onclick="this.select()" class="w-full text-xs border-gray-200 rounded-lg mb-2 px-2 py-1.5">
+                                                        <div class="flex gap-2">
+                                                            <button type="button" onclick="navigator.clipboard.writeText('{{ $trackUrl }}'); this.innerText='Copied!'" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-[10px] font-black uppercase tracking-widest py-1.5 rounded-lg">Copy</button>
+                                                            @if($booking->customer_email)
+                                                                <form action="{{ route('admin.bookings.resend-tracking', $booking) }}" method="POST" class="flex-1">
+                                                                    @csrf
+                                                                    <button type="submit" class="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-[10px] font-black uppercase tracking-widest py-1.5 rounded-lg">Email Customer</button>
+                                                                </form>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
                                             @if($booking->status === 'pending')
                                                 <form action="{{ route('admin.bookings.status', $booking) }}" method="POST" onsubmit="return confirm('Accept this booking?')">
                                                     @csrf @method('PUT')

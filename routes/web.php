@@ -188,6 +188,7 @@ Route::delete('/services/{service}', [AdminController::class, 'deleteService'])-
     Route::put('/bookings/{id}/restore', [AdminController::class, 'restoreBooking'])->name('bookings.restore');
     Route::delete('/bookings/{id}/force-delete', [AdminController::class, 'forceDeleteBooking'])->name('bookings.force-delete');
     Route::put('/bookings/{booking}/status', [AdminController::class, 'updateBookingStatus'])->name('bookings.status');
+    Route::post('/bookings/{booking}/resend-tracking', [AdminController::class, 'resendTrackingLink'])->name('bookings.resend-tracking');
     Route::get('/users-trash', [\App\Http\Controllers\Admin\UserController::class, 'trashedUsers'])->name('users.trash');
     Route::put('/users/{id}/restore', [\App\Http\Controllers\Admin\UserController::class, 'restoreUser'])->name('users.restore');
     Route::delete('/users/{id}/force-delete', [\App\Http\Controllers\Admin\UserController::class, 'forceDeleteUser'])->name('users.force-delete');

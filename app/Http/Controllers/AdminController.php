@@ -423,8 +423,23 @@ class AdminController extends Controller
 
     public function bookings()
     {
-        $bookings = Booking::with(['user', 'service', 'vendor'])->latest()->paginate(20);
+        $bookings = Booking::with(['user', 'service', 'vendor', 'payment'])->latest()->paginate(20);
         return view('admin.bookings', compact('bookings'));
+    }
+
+    /**
+     * Re-send the booking confirmation/tracking-link email to a guest
+     * customer who lost their tracking URL.
+     */
+    public function resendTrackingLink(Booking $booking)
+    {
+        if (!$booking->customer_email) {
+            return redirect()->back()->with('error', 'This booking has no customer email on file.');
+        }
+
+        \Illuminate\Support\Facades\Mail::to($booking->customer_email)->send(new \App\Mail\BookingReceipt($booking));
+
+        return redirect()->back()->with('success', 'Tracking link re-sent to ' . $booking->customer_email . '.');
     }
 
 
