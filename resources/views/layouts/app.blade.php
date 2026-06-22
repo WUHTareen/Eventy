@@ -65,6 +65,7 @@
             </main>
         </div>
         <x-back-to-top />
+        @stack('scripts')
     </body>
 </html>
 

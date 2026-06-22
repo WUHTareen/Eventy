@@ -76,6 +76,90 @@ class AdminController extends Controller
         ]);
     }
 
+    public function analytics(Request $request)
+    {
+        // Build the last 12 month buckets (oldest -> newest), DB-agnostic.
+        $months = collect();
+        for ($i = 11; $i >= 0; $i--) {
+            $m = now()->subMonths($i)->startOfMonth();
+            $months->put($m->format('Y-m'), [
+                'label'    => $m->format('M Y'),
+                'revenue'  => 0.0,
+                'bookings' => 0,
+                'users'    => 0,
+            ]);
+        }
+        $since = now()->subMonths(11)->startOfMonth();
+
+        // Bookings (last 12 months) — revenue counts completed only, booking count counts all.
+        Booking::where('created_at', '>=', $since)
+            ->get(['created_at', 'status', 'total_price'])
+            ->each(function ($b) use ($months) {
+                $key = $b->created_at->format('Y-m');
+                if (!$months->has($key)) return;
+                $bucket = $months->get($key);
+                $bucket['bookings']++;
+                if ($b->status === 'completed') {
+                    $bucket['revenue'] += (float) $b->total_price;
+                }
+                $months->put($key, $bucket);
+            });
+
+        // New users (last 12 months).
+        User::where('created_at', '>=', $since)
+            ->get(['created_at'])
+            ->each(function ($u) use ($months) {
+                $key = $u->created_at->format('Y-m');
+                if (!$months->has($key)) return;
+                $bucket = $months->get($key);
+                $bucket['users']++;
+                $months->put($key, $bucket);
+            });
+
+        $monthLabels    = $months->pluck('label')->values();
+        $revenueSeries  = $months->pluck('revenue')->values();
+        $bookingsSeries = $months->pluck('bookings')->values();
+        $usersSeries    = $months->pluck('users')->values();
+
+        // Bookings by status (doughnut).
+        $statusCounts = Booking::selectRaw('status, COUNT(*) as c')
+            ->groupBy('status')->pluck('c', 'status');
+        $statusOrder = ['pending', 'confirmed', 'completed', 'cancelled'];
+        $statusLabels = collect($statusOrder)->merge($statusCounts->keys())->unique()->values();
+        $statusData = $statusLabels->map(fn ($s) => (int) ($statusCounts[$s] ?? 0));
+
+        // Top 6 service categories by booking count.
+        $topCategories = Booking::join('services', 'bookings.service_id', '=', 'services.id')
+            ->leftJoin('service_categories', 'services.category_id', '=', 'service_categories.id')
+            ->selectRaw("COALESCE(service_categories.name, 'Uncategorized') as name, COUNT(*) as c")
+            ->groupBy('name')->orderByDesc('c')->limit(6)->pluck('c', 'name');
+
+        // Top 6 vendors by completed revenue.
+        $topVendors = Booking::where('bookings.status', 'completed')
+            ->join('users', 'bookings.vendor_id', '=', 'users.id')
+            ->selectRaw('users.name as name, SUM(bookings.total_price) as total')
+            ->groupBy('users.name')->orderByDesc('total')->limit(6)->pluck('total', 'name');
+
+        // KPI headline numbers.
+        $kpis = [
+            'revenue'    => (float) Booking::where('status', 'completed')->sum('total_price'),
+            'commission' => (float) Booking::where('status', 'completed')->sum('commission_fee'),
+            'bookings'   => Booking::count(),
+            'completed'  => Booking::where('status', 'completed')->count(),
+            'users'      => User::where('role', 'user')->count(),
+            'vendors'    => User::where('role', 'vendor')->count(),
+            'services'   => Service::count(),
+            'aov'        => 0.0,
+        ];
+        $completedCount = $kpis['completed'] ?: 1;
+        $kpis['aov'] = $kpis['revenue'] / $completedCount;
+
+        return view('admin.analytics', compact(
+            'monthLabels', 'revenueSeries', 'bookingsSeries', 'usersSeries',
+            'statusLabels', 'statusData', 'topCategories', 'topVendors', 'kpis'
+        ));
+    }
+
     public function budgetRequests()
     {
         $requests = BudgetRequest::with('user')->latest()->paginate(20);

@@ -171,6 +171,7 @@ Route::middleware(['auth', 'role:affiliate'])->prefix('affiliate')->name('affili
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/analytics', [AdminController::class, 'analytics'])->name('analytics');
     Route::get('/services', [AdminController::class, 'services'])->name('services');
     Route::get('/services/create', [AdminController::class, 'createService'])->name('services.create');
     Route::post('/services', [AdminController::class, 'storeService'])->name('services.store');

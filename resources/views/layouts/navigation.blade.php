@@ -57,6 +57,10 @@
                             <i class="fa-solid fa-shield-halved mr-2 text-[#0A3A7A]"></i> {{ __('Dashboard') }}
                         </x-nav-link>
                         
+                        <x-nav-link :href="route('admin.analytics')" :active="request()->routeIs('admin.analytics')">
+                            <i class="fa-solid fa-chart-line mr-2 text-emerald-600"></i> {{ __('Analytics') }}
+                        </x-nav-link>
+
                         <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
                             <i class="fa-solid fa-users mr-2 text-primary-500"></i> {{ __('Users') }}
                         </x-nav-link>
@@ -233,6 +237,9 @@
     @elseif(Auth::user()->hasRole('admin'))
                 <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                     {{ __('Admin Panel') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.analytics')" :active="request()->routeIs('admin.analytics')">
+                    {{ __('Analytics') }}
                 </x-responsive-nav-link>
             @else
                 <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
