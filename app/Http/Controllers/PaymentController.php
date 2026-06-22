@@ -158,14 +158,20 @@ class PaymentController extends Controller
             ]
         );
 
-        // Notify all admins that a payment needs verification
-        foreach (User::where('role', 'admin')->pluck('id') as $adminId) {
-            Notification::createSystemNotification(
-                $adminId,
-                'Payment Verification Needed',
-                "Payment proof submitted for Booking #{$booking->id} (PKR " . number_format($amount) . ").",
-                route('admin.payments.index')
-            );
+        // Notify all admins that a payment needs verification.
+        // Wrapped defensively so a notification failure can never block or
+        // break the customer's submission.
+        try {
+            foreach (User::where('role', 'admin')->pluck('id') as $adminId) {
+                Notification::createSystemNotification(
+                    $adminId,
+                    'Payment Verification Needed',
+                    "Payment proof submitted for Booking #{$booking->id} (PKR " . number_format($amount) . ").",
+                    route('admin.payments.index')
+                );
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Payment notification failed: ' . $e->getMessage());
         }
 
         if ($booking->user_id) {

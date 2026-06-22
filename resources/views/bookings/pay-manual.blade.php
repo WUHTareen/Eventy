@@ -54,7 +54,7 @@
             @php
                 $defaultMethod = old('payment_method', $accounts['bank_account'] || $accounts['bank_iban'] ? 'bank' : ($accounts['jazzcash_number'] ? 'jazzcash' : ($accounts['easypaisa_number'] ? 'easypaisa' : '')));
             @endphp
-            <div x-data="{ method: '{{ $defaultMethod }}' }">
+            <div x-data="{ method: '{{ $defaultMethod }}', submitting: false }">
 
             <!-- Where to pay -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
@@ -108,7 +108,7 @@
                     <i class="fa-solid fa-receipt text-indigo-500"></i> Upload payment proof
                 </h3>
 
-                <form action="{{ route('payment.manual.submit', $booking) }}{{ $token ? '?token='.$token : '' }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                <form action="{{ route('payment.manual.submit', $booking) }}{{ $token ? '?token='.$token : '' }}" method="POST" enctype="multipart/form-data" class="space-y-4" @submit="submitting = true">
                     @csrf
 
                     <div>
@@ -151,9 +151,11 @@
                         <p class="text-xs text-gray-400 mt-1">PNG or JPG, up to 4 MB.</p>
                     </div>
 
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-paper-plane"></i> Submit Payment Proof
+                    <button type="submit" :disabled="submitting" class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                        <span x-show="!submitting" class="flex items-center gap-2"><i class="fa-solid fa-paper-plane"></i> Submit Payment Proof</span>
+                        <span x-show="submitting" class="flex items-center gap-2"><i class="fa-solid fa-spinner fa-spin"></i> Uploading… please wait</span>
                     </button>
+                    <p class="text-xs text-gray-400 text-center" x-show="submitting" x-cloak>Large images can take a few seconds to upload. Please don't close this page.</p>
                 </form>
             </div>
 
