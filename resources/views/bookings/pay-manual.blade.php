@@ -51,6 +51,11 @@
                 </div>
             </div>
 
+            @php
+                $defaultMethod = old('payment_method', $accounts['bank_account'] || $accounts['bank_iban'] ? 'bank' : ($accounts['jazzcash_number'] ? 'jazzcash' : ($accounts['easypaisa_number'] ? 'easypaisa' : '')));
+            @endphp
+            <div x-data="{ method: '{{ $defaultMethod }}' }">
+
             <!-- Where to pay -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
                 <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -59,7 +64,7 @@
 
                 <div class="grid sm:grid-cols-2 gap-4">
                     @if($accounts['bank_account'] || $accounts['bank_iban'])
-                        <div class="border border-gray-100 rounded-xl p-4 bg-slate-50">
+                        <div class="border-2 rounded-xl p-4 bg-slate-50 cursor-pointer transition-all" :class="method === 'bank' ? 'border-indigo-400 ring-2 ring-indigo-100' : 'border-gray-100'" @click="method = 'bank'">
                             <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Bank Transfer</p>
                             @if($accounts['bank_name'])<p class="text-sm text-gray-700"><span class="text-gray-400">Bank:</span> <b>{{ $accounts['bank_name'] }}</b></p>@endif
                             @if($accounts['bank_title'])<p class="text-sm text-gray-700"><span class="text-gray-400">Title:</span> <b>{{ $accounts['bank_title'] }}</b></p>@endif
@@ -69,7 +74,7 @@
                     @endif
 
                     @if($accounts['jazzcash_number'])
-                        <div class="border border-gray-100 rounded-xl p-4 bg-slate-50">
+                        <div class="border-2 rounded-xl p-4 bg-slate-50 cursor-pointer transition-all" :class="method === 'jazzcash' ? 'border-rose-400 ring-2 ring-rose-100' : 'border-gray-100'" @click="method = 'jazzcash'">
                             <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">JazzCash</p>
                             <p class="text-sm text-gray-700"><span class="text-gray-400">Number:</span> <b>{{ $accounts['jazzcash_number'] }}</b></p>
                             @if($accounts['bank_title'])<p class="text-sm text-gray-700"><span class="text-gray-400">Name:</span> <b>{{ $accounts['bank_title'] }}</b></p>@endif
@@ -77,7 +82,7 @@
                     @endif
 
                     @if($accounts['easypaisa_number'])
-                        <div class="border border-gray-100 rounded-xl p-4 bg-slate-50">
+                        <div class="border-2 rounded-xl p-4 bg-slate-50 cursor-pointer transition-all" :class="method === 'easypaisa' ? 'border-emerald-400 ring-2 ring-emerald-100' : 'border-gray-100'" @click="method = 'easypaisa'">
                             <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">EasyPaisa</p>
                             <p class="text-sm text-gray-700"><span class="text-gray-400">Number:</span> <b>{{ $accounts['easypaisa_number'] }}</b></p>
                             @if($accounts['bank_title'])<p class="text-sm text-gray-700"><span class="text-gray-400">Name:</span> <b>{{ $accounts['bank_title'] }}</b></p>@endif
@@ -108,10 +113,16 @@
 
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">Paid via</label>
-                        <select name="payment_method" required class="w-full rounded-xl border-gray-200 focus:border-indigo-400 focus:ring-indigo-400 text-sm">
-                            <option value="bank">Bank Transfer</option>
-                            <option value="jazzcash">JazzCash</option>
-                            <option value="easypaisa">EasyPaisa</option>
+                        <select name="payment_method" x-model="method" required class="w-full rounded-xl border-gray-200 focus:border-indigo-400 focus:ring-indigo-400 text-sm">
+                            @if($accounts['bank_account'] || $accounts['bank_iban'])
+                                <option value="bank">Bank Transfer</option>
+                            @endif
+                            @if($accounts['jazzcash_number'])
+                                <option value="jazzcash">JazzCash</option>
+                            @endif
+                            @if($accounts['easypaisa_number'])
+                                <option value="easypaisa">EasyPaisa</option>
+                            @endif
                         </select>
                     </div>
 
@@ -122,9 +133,15 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Transaction ID / Reference <span class="text-gray-400">(optional)</span></label>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">
+                            Transaction ID / Reference
+                            <span class="text-red-400" x-show="method !== 'bank'">*</span>
+                            <span class="text-gray-400" x-show="method === 'bank'">(optional)</span>
+                        </label>
                         <input type="text" name="transaction_reference" value="{{ old('transaction_reference') }}"
+                               :required="method !== 'bank'"
                                class="w-full rounded-xl border-gray-200 focus:border-indigo-400 focus:ring-indigo-400 text-sm" placeholder="e.g. TXN123456789">
+                        <p class="text-xs text-gray-400 mt-1" x-show="method !== 'bank'">Required for JazzCash/EasyPaisa — find it in your app's transaction history.</p>
                     </div>
 
                     <div>
@@ -138,6 +155,8 @@
                         <i class="fa-solid fa-paper-plane"></i> Submit Payment Proof
                     </button>
                 </form>
+            </div>
+
             </div>
 
         </div>

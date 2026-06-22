@@ -133,7 +133,7 @@ class PaymentController extends Controller
         $validated = $request->validate([
             'payment_method'        => 'required|in:bank,jazzcash,easypaisa',
             'sender_name'           => 'required|string|max:120',
-            'transaction_reference' => 'nullable|string|max:120',
+            'transaction_reference' => 'required_unless:payment_method,bank|nullable|string|max:120',
             'payment_proof'         => 'required|image|mimes:png,jpg,jpeg|max:4096',
         ]);
 
