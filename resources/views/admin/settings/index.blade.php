@@ -119,14 +119,6 @@
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-600 mb-1">Stripe Publishable Key</label>
-                            <input type="text" name="stripe_key" value="{{ $settings['stripe_key'] ?? '' }}" placeholder="pk_live_..." class="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-600 mb-1">Stripe Secret Key</label>
-                            <input type="password" name="stripe_secret" value="{{ $settings['stripe_secret'] ?? '' }}" placeholder="sk_live_..." class="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm">
-                        </div>
-                        <div>
                             <label class="block text-sm font-semibold text-gray-600 mb-1">Default Commission Rate (%)</label>
                             <input type="number" name="commission_rate" value="{{ $settings['commission_rate'] ?? '10' }}" min="0" max="100" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
                             <p class="text-xs text-gray-400 mt-1">Platform commission percentage on each booking</p>
