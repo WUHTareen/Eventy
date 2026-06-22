@@ -116,6 +116,32 @@
                     </div>
                 </div>
 
+                <!-- CORPORATE SOLUTIONS (text) -->
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800"><i class="fa-solid fa-building text-[#0A192F] mr-2"></i>Corporate Solutions Section</h3>
+                            <p class="text-gray-500 text-sm">Heading + the avatar caption. Manage the cards in Media &amp; Graphics below.</p>
+                        </div>
+                        <label class="flex items-center gap-2 text-sm font-bold text-gray-600 cursor-pointer">
+                            <input type="checkbox" name="hp_corp_show" value="1" @checked(old('hp_corp_show', $hp['hp_corp_show']) === '1') class="rounded"> Show
+                        </label>
+                    </div>
+                    <div class="p-8 space-y-5">
+                        <div><label class="{{ $labelCls }}">Badge</label><input type="text" name="hp_corp_badge" value="{{ old('hp_corp_badge', $hp['hp_corp_badge']) }}" class="{{ $inputCls }}"></div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                            <div><label class="{{ $labelCls }}">Heading</label><input type="text" name="hp_corp_title" value="{{ old('hp_corp_title', $hp['hp_corp_title']) }}" class="{{ $inputCls }}"></div>
+                            <div><label class="{{ $labelCls }}">Heading (highlighted)</label><input type="text" name="hp_corp_title_hl" value="{{ old('hp_corp_title_hl', $hp['hp_corp_title_hl']) }}" class="{{ $inputCls }}"></div>
+                            <div><label class="{{ $labelCls }}">Heading (end)</label><input type="text" name="hp_corp_title_end" value="{{ old('hp_corp_title_end', $hp['hp_corp_title_end']) }}" class="{{ $inputCls }}"></div>
+                        </div>
+                        <div><label class="{{ $labelCls }}">Subtitle</label><textarea name="hp_corp_subtitle" rows="2" class="{{ $inputCls }}">{{ old('hp_corp_subtitle', $hp['hp_corp_subtitle']) }}</textarea></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div><label class="{{ $labelCls }}">Avatar Caption</label><input type="text" name="hp_avatar_label" value="{{ old('hp_avatar_label', $hp['hp_avatar_label']) }}" class="{{ $inputCls }}"></div>
+                            <div><label class="{{ $labelCls }}">Avatar "+N" Badge</label><input type="text" name="hp_avatar_extra" value="{{ old('hp_avatar_extra', $hp['hp_avatar_extra']) }}" class="{{ $inputCls }}"></div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- HOW IT WORKS -->
                 <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
                     <div class="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
@@ -176,6 +202,28 @@
                     </div>
                 </div>
 
+                <!-- TECH / VIDEO BENTO (text) -->
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800"><i class="fa-solid fa-clapperboard text-blue-500 mr-2"></i>Tech / Video Section</h3>
+                            <p class="text-gray-500 text-sm">Heading. Manage the 3 video tiles in Media &amp; Graphics below.</p>
+                        </div>
+                        <label class="flex items-center gap-2 text-sm font-bold text-gray-600 cursor-pointer">
+                            <input type="checkbox" name="hp_tech_show" value="1" @checked(old('hp_tech_show', $hp['hp_tech_show']) === '1') class="rounded"> Show
+                        </label>
+                    </div>
+                    <div class="p-8 space-y-5">
+                        <div><label class="{{ $labelCls }}">Badge</label><input type="text" name="hp_tech_badge" value="{{ old('hp_tech_badge', $hp['hp_tech_badge']) }}" class="{{ $inputCls }}"></div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                            <div><label class="{{ $labelCls }}">Heading</label><input type="text" name="hp_tech_title" value="{{ old('hp_tech_title', $hp['hp_tech_title']) }}" class="{{ $inputCls }}"></div>
+                            <div><label class="{{ $labelCls }}">Heading (highlighted)</label><input type="text" name="hp_tech_title_hl" value="{{ old('hp_tech_title_hl', $hp['hp_tech_title_hl']) }}" class="{{ $inputCls }}"></div>
+                            <div><label class="{{ $labelCls }}">Heading (end)</label><input type="text" name="hp_tech_title_end" value="{{ old('hp_tech_title_end', $hp['hp_tech_title_end']) }}" class="{{ $inputCls }}"></div>
+                        </div>
+                        <div><label class="{{ $labelCls }}">Subtitle</label><textarea name="hp_tech_subtitle" rows="2" class="{{ $inputCls }}">{{ old('hp_tech_subtitle', $hp['hp_tech_subtitle']) }}</textarea></div>
+                    </div>
+                </div>
+
                 <!-- TESTIMONIALS -->
                 <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
                     <div class="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
@@ -194,54 +242,6 @@
                             <div><label class="{{ $labelCls }}">Heading (highlighted)</label><input type="text" name="hp_testi_title_hl" value="{{ old('hp_testi_title_hl', $hp['hp_testi_title_hl']) }}" class="{{ $inputCls }}"></div>
                         </div>
                         <div><label class="{{ $labelCls }}">Subtitle</label><textarea name="hp_testi_subtitle" rows="2" class="{{ $inputCls }}">{{ old('hp_testi_subtitle', $hp['hp_testi_subtitle']) }}</textarea></div>
-                    </div>
-                </div>
-
-                <!-- CORPORATE SOLUTIONS (text) -->
-                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-bold text-gray-800"><i class="fa-solid fa-building text-[#0A192F] mr-2"></i>Corporate Solutions Section</h3>
-                            <p class="text-gray-500 text-sm">Heading + the avatar caption. Manage the cards below.</p>
-                        </div>
-                        <label class="flex items-center gap-2 text-sm font-bold text-gray-600 cursor-pointer">
-                            <input type="checkbox" name="hp_corp_show" value="1" @checked(old('hp_corp_show', $hp['hp_corp_show']) === '1') class="rounded"> Show
-                        </label>
-                    </div>
-                    <div class="p-8 space-y-5">
-                        <div><label class="{{ $labelCls }}">Badge</label><input type="text" name="hp_corp_badge" value="{{ old('hp_corp_badge', $hp['hp_corp_badge']) }}" class="{{ $inputCls }}"></div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                            <div><label class="{{ $labelCls }}">Heading</label><input type="text" name="hp_corp_title" value="{{ old('hp_corp_title', $hp['hp_corp_title']) }}" class="{{ $inputCls }}"></div>
-                            <div><label class="{{ $labelCls }}">Heading (highlighted)</label><input type="text" name="hp_corp_title_hl" value="{{ old('hp_corp_title_hl', $hp['hp_corp_title_hl']) }}" class="{{ $inputCls }}"></div>
-                            <div><label class="{{ $labelCls }}">Heading (end)</label><input type="text" name="hp_corp_title_end" value="{{ old('hp_corp_title_end', $hp['hp_corp_title_end']) }}" class="{{ $inputCls }}"></div>
-                        </div>
-                        <div><label class="{{ $labelCls }}">Subtitle</label><textarea name="hp_corp_subtitle" rows="2" class="{{ $inputCls }}">{{ old('hp_corp_subtitle', $hp['hp_corp_subtitle']) }}</textarea></div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div><label class="{{ $labelCls }}">Avatar Caption</label><input type="text" name="hp_avatar_label" value="{{ old('hp_avatar_label', $hp['hp_avatar_label']) }}" class="{{ $inputCls }}"></div>
-                            <div><label class="{{ $labelCls }}">Avatar "+N" Badge</label><input type="text" name="hp_avatar_extra" value="{{ old('hp_avatar_extra', $hp['hp_avatar_extra']) }}" class="{{ $inputCls }}"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TECH / VIDEO BENTO (text) -->
-                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-bold text-gray-800"><i class="fa-solid fa-clapperboard text-blue-500 mr-2"></i>Tech / Video Section</h3>
-                            <p class="text-gray-500 text-sm">Heading. Manage the 3 video tiles below.</p>
-                        </div>
-                        <label class="flex items-center gap-2 text-sm font-bold text-gray-600 cursor-pointer">
-                            <input type="checkbox" name="hp_tech_show" value="1" @checked(old('hp_tech_show', $hp['hp_tech_show']) === '1') class="rounded"> Show
-                        </label>
-                    </div>
-                    <div class="p-8 space-y-5">
-                        <div><label class="{{ $labelCls }}">Badge</label><input type="text" name="hp_tech_badge" value="{{ old('hp_tech_badge', $hp['hp_tech_badge']) }}" class="{{ $inputCls }}"></div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                            <div><label class="{{ $labelCls }}">Heading</label><input type="text" name="hp_tech_title" value="{{ old('hp_tech_title', $hp['hp_tech_title']) }}" class="{{ $inputCls }}"></div>
-                            <div><label class="{{ $labelCls }}">Heading (highlighted)</label><input type="text" name="hp_tech_title_hl" value="{{ old('hp_tech_title_hl', $hp['hp_tech_title_hl']) }}" class="{{ $inputCls }}"></div>
-                            <div><label class="{{ $labelCls }}">Heading (end)</label><input type="text" name="hp_tech_title_end" value="{{ old('hp_tech_title_end', $hp['hp_tech_title_end']) }}" class="{{ $inputCls }}"></div>
-                        </div>
-                        <div><label class="{{ $labelCls }}">Subtitle</label><textarea name="hp_tech_subtitle" rows="2" class="{{ $inputCls }}">{{ old('hp_tech_subtitle', $hp['hp_tech_subtitle']) }}</textarea></div>
                     </div>
                 </div>
 
@@ -264,29 +264,29 @@
                 @include('admin.homepage._media_section', [
                     'section' => 'corporate_card', 'items' => $media['corporate_card'],
                     'label' => 'Corporate Cards', 'icon' => 'fa-id-card-clip', 'iconColor' => 'text-[#ED1C24]',
-                    'help' => 'The 3 big image cards. Upload image + edit details.',
+                    'help' => 'The 3 big image cards in the Corporate Solutions section. Upload image + edit details.',
                     'fields' => ['image', 'title', 'subtitle', 'badge', 'tag', 'price', 'link', 'meta_dept', 'meta_verified'],
-                ])
-
-                @include('admin.homepage._media_section', [
-                    'section' => 'video_tile', 'items' => $media['video_tile'],
-                    'label' => 'Video Tiles', 'icon' => 'fa-film', 'iconColor' => 'text-blue-500',
-                    'help' => 'Up to 3 tiles. First is the large one. Upload video + poster.',
-                    'fields' => ['video', 'poster', 'meta_icon', 'title', 'subtitle', 'link'],
-                ])
-
-                @include('admin.homepage._media_section', [
-                    'section' => 'landmark', 'items' => $media['landmark'],
-                    'label' => 'Cities / Landmarks', 'icon' => 'fa-city', 'iconColor' => 'text-amber-500',
-                    'help' => 'Tick "Pakistan" for the local grid, untick for the global grid.',
-                    'fields' => ['image', 'title', 'tag', 'badge', 'meta_is_local'],
                 ])
 
                 @include('admin.homepage._media_section', [
                     'section' => 'avatar', 'items' => $media['avatar'],
                     'label' => 'Trust Avatars', 'icon' => 'fa-users', 'iconColor' => 'text-purple-500',
-                    'help' => 'Client avatar faces shown in the corporate section (first 3 used).',
+                    'help' => 'Client avatar faces shown in the Corporate Solutions section (first 3 used).',
                     'fields' => ['image', 'title'],
+                ])
+
+                @include('admin.homepage._media_section', [
+                    'section' => 'landmark', 'items' => $media['landmark'],
+                    'label' => 'Cities / Landmarks', 'icon' => 'fa-city', 'iconColor' => 'text-amber-500',
+                    'help' => 'Appears after How It Works. Tick "Pakistan" for the local grid, untick for the global grid.',
+                    'fields' => ['image', 'title', 'tag', 'badge', 'meta_is_local'],
+                ])
+
+                @include('admin.homepage._media_section', [
+                    'section' => 'video_tile', 'items' => $media['video_tile'],
+                    'label' => 'Video Tiles', 'icon' => 'fa-film', 'iconColor' => 'text-blue-500',
+                    'help' => 'Up to 3 tiles in the Tech / Video section. First is the large one. Upload video + poster.',
+                    'fields' => ['video', 'poster', 'meta_icon', 'title', 'subtitle', 'link'],
                 ])
             </div>
         </div>
