@@ -177,7 +177,8 @@ class AdminController extends Controller
             ->join('services', 'bookings.service_id', '=', 'services.id')
             ->leftJoin('service_categories', 'services.category_id', '=', 'service_categories.id')
             ->selectRaw("COALESCE(service_categories.name, 'Uncategorized') as name, COUNT(*) as c")
-            ->groupBy('name')->orderByDesc('c')->limit(6)->pluck('c', 'name');
+            ->groupByRaw("COALESCE(service_categories.name, 'Uncategorized')")
+            ->orderByDesc('c')->limit(6)->pluck('c', 'name');
 
         // ---- Top services (in range) ---------------------------------------
         $topServices = Booking::whereBetween('bookings.created_at', [$start, $end])

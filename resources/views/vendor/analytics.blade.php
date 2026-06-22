@@ -104,10 +104,10 @@
                         @forelse($recentBookings as $booking)
                             <div class="flex items-start gap-4 {{ !$loop->last ? 'mb-4 pb-4 border-b border-gray-100' : '' }}">
                                 <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold flex-shrink-0">
-                                    {{ substr($booking->user->name, 0, 1) }}
+                                    {{ substr($booking->user->name ?? $booking->customer_name ?? 'G', 0, 1) }}
                                 </div>
                                 <div class="flex-grow min-w-0">
-                                    <p class="font-medium text-gray-900">{{ $booking->user->name }}</p>
+                                    <p class="font-medium text-gray-900">{{ $booking->user->name ?? $booking->customer_name ?? 'Guest' }}</p>
                                     <p class="text-sm text-gray-500 truncate">{{ $booking->service->name }}</p>
                                     <p class="text-xs text-gray-400 mt-1">{{ $booking->created_at->diffForHumans() }}</p>
                                 </div>

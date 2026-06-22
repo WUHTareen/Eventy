@@ -368,7 +368,7 @@
                     this.isGettingSuggestions = true;
                     this.imageSuggestions = null;
                     
-                    fetch('{{ route("ai.suggest-images") }}', {
+                    fetch('{{ route("vendor.ai.suggest-images") }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -405,7 +405,7 @@
 
                     this.isOptimizing = true;
                     
-                    fetch('{{ route("ai.optimize-description") }}', {
+                    fetch('{{ route("vendor.ai.optimize-description") }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

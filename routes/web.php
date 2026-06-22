@@ -131,8 +131,8 @@ Route::middleware(['auth', 'role:vendor'])->prefix('vendor')->name('vendor.')->g
     Route::get('/analytics', [VendorController::class, 'analytics'])->name('analytics');
     Route::get('/profile', [VendorController::class, 'profile'])->name('profile');
     Route::post('/profile', [VendorController::class, 'updateProfile'])->name('profile.update');
-    Route::get('/finance', [VendorController::class, 'finance'])->name('finance');
-    Route::post('/withdraw', [VendorController::class, 'withdraw'])->name('withdraw');
+    Route::get('/finance', [VendorController::class, 'wallet'])->name('finance');
+    Route::post('/withdraw', [VendorController::class, 'requestWithdrawal'])->name('withdraw');
 
     Route::post('/ai/optimize-description', [\App\Http\Controllers\AIController::class, 'optimizeDescription'])->name('ai.optimize-description');
     Route::post('/ai/suggest-images', [\App\Http\Controllers\AIController::class, 'suggestImages'])->name('ai.suggest-images');
@@ -283,7 +283,7 @@ Route::prefix('hotels')->name('hotels.')->group(function () {
 });
 
 // Vendor
-Route::middleware(['auth'])->prefix('hotel/vendor')->name('hotel.vendor.')->group(function () {
+Route::middleware(['auth', 'role:vendor'])->prefix('hotel/vendor')->name('hotel.vendor.')->group(function () {
     Route::get('/dashboard', [HotelController::class, 'vendorDashboard'])->name('dashboard');
     Route::get('/create', [HotelController::class, 'vendorCreate'])->name('create');
     Route::post('/store', [HotelController::class, 'vendorStore'])->name('store');

@@ -23,10 +23,14 @@ class VendorController extends Controller
             ->sum('vendor_net_amount');
 
         // Chart Data: Last 6 Months Revenue
+        $monthExpr = \Illuminate\Support\Facades\DB::getDriverName() === 'sqlite'
+            ? "CAST(strftime('%m', booking_date) as integer)"
+            : 'MONTH(booking_date)';
+
         $monthlyRevenue = Auth::user()->receivedBookings()
             ->where('status', 'completed')
             ->where('booking_date', '>=', now()->subMonths(6))
-            ->selectRaw('SUM(total_price) as total, MONTH(booking_date) as month')
+            ->selectRaw("SUM(total_price) as total, {$monthExpr} as month")
             ->groupBy('month')
             ->orderBy('month')
             ->pluck('total', 'month')
@@ -35,7 +39,7 @@ class VendorController extends Controller
         // Chart Data: Last 6 Months Bookings
         $monthlyBookings = Auth::user()->receivedBookings()
             ->where('booking_date', '>=', now()->subMonths(6))
-            ->selectRaw('COUNT(*) as total, MONTH(booking_date) as month')
+            ->selectRaw("COUNT(*) as total, {$monthExpr} as month")
             ->groupBy('month')
             ->orderBy('month')
             ->pluck('total', 'month')
@@ -87,8 +91,8 @@ class VendorController extends Controller
             'price_type' => 'nullable|string|max:50',
             'category_id' => 'nullable|exists:service_categories,id',
             'location' => 'nullable|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'featured_image_index' => 'nullable|integer|min:0',
             'extra' => 'nullable|array',
             'packages' => 'nullable|array',
@@ -163,8 +167,8 @@ class VendorController extends Controller
             'price' => 'required|numeric',
             'category_id' => 'nullable|exists:service_categories,id',
             'location' => 'nullable|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'featured_image_index' => 'nullable|integer|min:0',
             'removed_indices' => 'nullable|array',
             'packages' => 'nullable|array',
@@ -248,20 +252,24 @@ class VendorController extends Controller
         $user = Auth::user();
         
         // Get monthly booking stats
+        $analyticsMonthExpr = \Illuminate\Support\Facades\DB::getDriverName() === 'sqlite'
+            ? "CAST(strftime('%m', created_at) as integer)"
+            : 'MONTH(created_at)';
+
         $monthlyBookings = Booking::where('vendor_id', $user->id)
             ->whereYear('created_at', now()->year)
-            ->selectRaw('MONTH(created_at) as month, COUNT(*) as count, status')
+            ->selectRaw("{$analyticsMonthExpr} as month, COUNT(*) as count, status")
             ->groupBy('month', 'status')
             ->get();
         
         // Get earnings
         $totalEarnings = $user->receivedBookings()
-            ->where('status', 'completed')
+            ->where('bookings.status', 'completed')
             ->join('services', 'bookings.service_id', '=', 'services.id')
             ->sum('services.price');
 
         $thisMonthEarnings = $user->receivedBookings()
-            ->where('status', 'completed')
+            ->where('bookings.status', 'completed')
             ->whereMonth('bookings.created_at', now()->month)
             ->join('services', 'bookings.service_id', '=', 'services.id')
             ->sum('services.price');
