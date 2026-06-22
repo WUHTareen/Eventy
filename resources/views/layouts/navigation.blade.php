@@ -1,5 +1,5 @@
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
@@ -69,10 +69,6 @@
                             <i class="fa-solid fa-store mr-2 text-green-600"></i> {{ __('Vendors') }}
                         </x-nav-link>
 
-                        <x-nav-link :href="route('admin.vendor-logs')" :active="request()->routeIs('admin.vendor-logs')">
-                            <i class="fa-solid fa-file-contract mr-2 text-indigo-600"></i> {{ __('Vendor Logs') }}
-                        </x-nav-link>
-
                         <x-nav-link :href="route('admin.withdrawals')" :active="request()->routeIs('admin.withdrawals')">
                             <i class="fa-solid fa-money-bill-transfer mr-2 text-amber-600"></i> {{ __('Withdrawals') }}
                         </x-nav-link>
@@ -90,6 +86,9 @@
                                     </button>
                                 </x-slot>
                                 <x-slot name="content">
+                                    <x-dropdown-link :href="route('admin.vendor-logs')">
+                                        <i class="fa-solid fa-file-contract mr-2 text-gray-400"></i> {{ __('Vendor Logs') }}
+                                    </x-dropdown-link>
                                     <x-dropdown-link :href="route('admin.homepage.edit')">
                                         <i class="fa-solid fa-house-laptop mr-2 text-gray-400"></i> {{ __('Homepage Content') }}
                                     </x-dropdown-link>
